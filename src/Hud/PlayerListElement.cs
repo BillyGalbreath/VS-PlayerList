@@ -75,8 +75,7 @@ internal class PlayerListElement : HudElement {
         int? key2 = args.KeyCode2;
 
         capi.SendChatMessage($"KEY DOWN --> Char: {ch} Key: {key} Key2: {key2}");
-
-
+    }
 
     public override bool TryClose() {
         return false;
