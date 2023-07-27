@@ -62,19 +62,17 @@ internal class PlayerListElement : HudElement {
     }
 
     public override void OnKeyDown(KeyEvent args) {
-        char ch = args.KeyChar;
         int key = args.KeyCode;
         int? key2 = args.KeyCode2;
 
-        capi.SendChatMessage($"KEY UP --> Char: {ch} Key: {key} Key2: {key2}");
+        capi.SendChatMessage($"KEY DOWN --> Key: {key} Key2: {key2}");
     }
 
     public override void OnKeyUp(KeyEvent args) {
-        char ch = args.KeyChar;
         int key = args.KeyCode;
         int? key2 = args.KeyCode2;
 
-        capi.SendChatMessage($"KEY DOWN --> Char: {ch} Key: {key} Key2: {key2}");
+        capi.SendChatMessage($"KEY UP --> Key: {key} Key2: {key2}");
     }
 
     public override bool TryClose() {
