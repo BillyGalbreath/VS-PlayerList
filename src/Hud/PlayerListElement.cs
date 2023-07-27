@@ -42,22 +42,6 @@ internal class PlayerListElement : HudElement {
         TryOpen();
     }
 
-    public override void OnKeyDown(KeyEvent args) {
-        char ch = args.KeyChar;
-        int key = args.KeyCode;
-        int? key2 = args.KeyCode2;
-
-        capi.SendChatMessage($"KEY UP --> Char: {ch} Key: {key} Key2: {key2}");
-    }
-
-    public override void OnKeyUp(KeyEvent args) {
-        char ch = args.KeyChar;
-        int key = args.KeyCode;
-        int? key2 = args.KeyCode2;
-
-        capi.SendChatMessage($"KEY DOWN --> Char: {ch} Key: {key} Key2: {key2}");
-    }
-
     public override void OnRenderGUI(float deltaTime) {
         if (tabIsDown) {
             base.OnRenderGUI(deltaTime);
@@ -74,11 +58,28 @@ internal class PlayerListElement : HudElement {
     }
 
     public override bool ShouldReceiveKeyboardEvents() {
-        return false;
+        return true;
     }
 
+    public override void OnKeyDown(KeyEvent args) {
+        char ch = args.KeyChar;
+        int key = args.KeyCode;
+        int? key2 = args.KeyCode2;
+
+        capi.SendChatMessage($"KEY UP --> Char: {ch} Key: {key} Key2: {key2}");
+    }
+
+    public override void OnKeyUp(KeyEvent args) {
+        char ch = args.KeyChar;
+        int key = args.KeyCode;
+        int? key2 = args.KeyCode2;
+
+        capi.SendChatMessage($"KEY DOWN --> Char: {ch} Key: {key} Key2: {key2}");
+
+
+
     public override bool TryClose() {
-        return base.TryClose();
+        return false;
     }
 
     public override void Dispose() {
