@@ -47,7 +47,7 @@ internal class PlayerListElement : HudElement {
         int key = args.KeyCode;
         int? key2 = args.KeyCode2;
 
-        capi.Logger.Event($"KEY UP --> Char: {ch} Key: {key} Key2: {key2}");
+        capi.SendChatMessage($"KEY UP --> Char: {ch} Key: {key} Key2: {key2}");
     }
 
     public override void OnKeyUp(KeyEvent args) {
@@ -55,7 +55,7 @@ internal class PlayerListElement : HudElement {
         int key = args.KeyCode;
         int? key2 = args.KeyCode2;
 
-        capi.Logger.Event($"KEY DOWN --> Char: {ch} Key: {key} Key2: {key2}");
+        capi.SendChatMessage($"KEY DOWN --> Char: {ch} Key: {key} Key2: {key2}");
     }
 
     public override void OnRenderGUI(float deltaTime) {
