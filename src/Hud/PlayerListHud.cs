@@ -10,6 +10,7 @@ public class PlayerListHud : IRenderer {
     private readonly ICoreClientAPI api;
     private readonly Matrixf mvMatrix = new();
     private readonly MeshRef backgroundRef;
+    private readonly Vec4f colorMask = new(1, 1, 1, 1);
 
     public PlayerListHud(ICoreClientAPI api) {
         this.api = api;
@@ -17,7 +18,7 @@ public class PlayerListHud : IRenderer {
         api.Event.PlayerJoin += Update;
         api.Event.PlayerLeave += Update;
 
-        backgroundRef = api.Render.UploadMesh(QuadMeshUtil.GetQuad());
+        backgroundRef = api.Render.UploadMesh(GetQuad(0x80000000));
     }
 
     private void Update(IClientPlayer player) {
@@ -46,10 +47,8 @@ public class PlayerListHud : IRenderer {
     public void OnRenderFrame(float deltaTime, EnumRenderStage stage) {
         IShaderProgram shader = api.Render.CurrentActiveShader;
 
-        Vec4f color = new(0.5F, 1, 1, 1);
-
         // Render background
-        shader.Uniform("rgbaIn", color);
+        shader.Uniform("rgbaIn", colorMask);
         shader.Uniform("extraGlow", 0);
         shader.Uniform("applyColor", 0);
         shader.Uniform("tex2d", 0);
@@ -73,5 +72,35 @@ public class PlayerListHud : IRenderer {
 
     public void Dispose() {
         api.Render.DeleteMesh(backgroundRef);
+    }
+
+    private static readonly int[] quadVertices = new int[12] { -1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0 };
+    private static readonly int[] quadTextureCoords = new int[8] { 0, 0, 1, 0, 1, 1, 0, 1 };
+    private static readonly int[] quadVertexIndices = new int[6] { 0, 1, 2, 0, 2, 3 };
+
+    private static MeshData GetQuad(uint argb) {
+        float[] xyz = new float[12];
+        for (int i = 0; i < 12; i++) {
+            xyz[i] = quadVertices[i];
+        }
+        float[] uv = new float[8];
+        for (int j = 0; j < uv.Length; j++) {
+            uv[j] = quadTextureCoords[j];
+        }
+        byte[] rgba = new byte[16];
+        for (int j = 0; j < 4; j++) {
+            rgba[j * 4] = (byte)(argb >> 16 & 0xFF);
+            rgba[j * 4 + 1] = (byte)(argb >> 8 & 0xFF);
+            rgba[j * 4 + 2] = (byte)(argb & 0xFF);
+            rgba[j * 4 + 3] = (byte)(argb >> 24 & 0xFF);
+        }
+        MeshData meshData = new();
+        meshData.SetXyz(xyz);
+        meshData.SetUv(uv);
+        meshData.SetRgba(rgba);
+        meshData.SetVerticesCount(4);
+        meshData.SetIndices(quadVertexIndices);
+        meshData.SetIndicesCount(6);
+        return meshData;
     }
 }
