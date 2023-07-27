@@ -19,12 +19,7 @@ public class PlayerListHud : IRenderer {
     }
 
     private void Update(IClientPlayer player) {
-        api.Gui.CreateCompo("playerlist:thelist", new ElementBounds() {
-            Alignment = EnumDialogArea.CenterFixed,
-            BothSizing = ElementSizing.Fixed,
-            fixedWidth = 500,
-            fixedHeight = 500
-        });
+        //
     }
 
     public double RenderOrder {
