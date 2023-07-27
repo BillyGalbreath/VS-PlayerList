@@ -10,6 +10,6 @@ public class PlayerListMod : ModSystem {
     }
 
     public override void StartClientSide(ICoreClientAPI api) {
-        api.Gui.RegisterDialog(new PlayerListHud(api));
+        api.Event.RegisterRenderer(new PlayerListHud(api), EnumRenderStage.Ortho);
     }
 }
