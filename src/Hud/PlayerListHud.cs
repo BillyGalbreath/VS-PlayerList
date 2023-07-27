@@ -17,8 +17,7 @@ public class PlayerListHud : IRenderer {
         api.Event.PlayerJoin += Update;
         api.Event.PlayerLeave += Update;
 
-        MeshData rectangle = LineMeshUtil.GetRectangle(ColorUtil.ToRgba(128, 0, 0, 0));
-        backgroundRef = api.Render.UploadMesh(rectangle);
+        backgroundRef = api.Render.UploadMesh(QuadMeshUtil.GetQuad());
     }
 
     private void Update(IClientPlayer player) {
@@ -47,7 +46,7 @@ public class PlayerListHud : IRenderer {
     public void OnRenderFrame(float deltaTime, EnumRenderStage stage) {
         IShaderProgram shader = api.Render.CurrentActiveShader;
 
-        Vec4f color = new(1, 1, 1, 1);
+        Vec4f color = new(0.5F, 1, 1, 1);
 
         // Render background
         shader.Uniform("rgbaIn", color);
