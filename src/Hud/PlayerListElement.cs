@@ -4,17 +4,15 @@ using Vintagestory.API.Config;
 namespace PlayerList.Hud;
 
 internal class PlayerListElement : HudElement {
-    readonly long listenerId;
+    private readonly long listenerId;
 
-    public override double InputOrder { get { return 1; } }
+    private bool tabIsDown;
 
     public PlayerListElement(ICoreClientAPI api) : base(api) {
         listenerId = capi.Event.RegisterGameTickListener(OnGameTick, 20);
 
         ComposeGuis();
     }
-
-    public override string ToggleKeyCombinationCode { get { return null; } }
 
     private void OnGameTick(float dt) {
         Update();
@@ -44,9 +42,31 @@ internal class PlayerListElement : HudElement {
         TryOpen();
     }
 
-    public override void OnRenderGUI(float deltaTime) {
-        base.OnRenderGUI(deltaTime);
+    public override void OnKeyDown(KeyEvent args) {
+        char ch = args.KeyChar;
+        int key = args.KeyCode;
+        int? key2 = args.KeyCode2;
+
+        capi.Logger.Event($"KEY UP --> Char: {ch} Key: {key} Key2: {key2}");
     }
+
+    public override void OnKeyUp(KeyEvent args) {
+        char ch = args.KeyChar;
+        int key = args.KeyCode;
+        int? key2 = args.KeyCode2;
+
+        capi.Logger.Event($"KEY DOWN --> Char: {ch} Key: {key} Key2: {key2}");
+    }
+
+    public override void OnRenderGUI(float deltaTime) {
+        if (tabIsDown) {
+            base.OnRenderGUI(deltaTime);
+        }
+    }
+
+    public override string ToggleKeyCombinationCode { get { return null; } }
+
+    public override double InputOrder { get { return 1; } }
 
     public override bool Focusable => false;
 
