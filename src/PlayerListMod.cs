@@ -14,13 +14,21 @@ public class PlayerListMod : ModSystem {
     public override void StartClientSide(ICoreClientAPI api) {
         _ = new PlayerListHud(api);
 
-        ActionConsumable<KeyCombination> vanillaHandler = api.Input.GetHotKeyByCode("chatdialog").Handler;
+        api.Input.RegisterHotKey("playerlist", "Hold to show the player list", GlKeys.Tab, HotkeyType.GUIOrOtherControls);
+        api.Input.SetHotKeyHandler("playerlist", combo => true);
 
-        api.Input.SetHotKeyHandler("chatdialog", comb => {
-            if (comb.KeyCode == (int)GlKeys.Tab && !comb.Alt && !comb.Ctrl && !comb.Shift) {
+        ActionConsumable<KeyCombination> vanillaHandler = api.Input.GetHotKeyByCode("chatdialog").Handler;
+        api.Input.SetHotKeyHandler("chatdialog", vanillaCombo => {
+            KeyCombination playerlistCombo = api.Input.GetHotKeyByCode("playerlist").CurrentMapping;
+            if (vanillaCombo.KeyCode == playerlistCombo.KeyCode &&
+                vanillaCombo.SecondKeyCode == playerlistCombo.SecondKeyCode &&
+                vanillaCombo.Alt == playerlistCombo.Alt &&
+                vanillaCombo.Ctrl == playerlistCombo.Ctrl &&
+                vanillaCombo.Shift == playerlistCombo.Shift
+            ) {
                 return true;
             } else {
-                return vanillaHandler(comb);
+                return vanillaHandler(vanillaCombo);
             }
         });
     }
@@ -36,8 +44,37 @@ public class PlayerListMod : ModSystem {
             UpdateList();
         }
 
+        public bool IsKeyComboActive() {
+            KeyCombination combo = capi.Input.GetHotKeyByCode("playerlist").CurrentMapping;
+            return capi.Input.KeyboardKeyState[combo.KeyCode] &&
+                IsAltDown() == combo.Alt &&
+                IsCtrlDown() == combo.Ctrl &&
+                IsShiftDown() == combo.Shift;
+        }
+
+        private bool IsAltDown() {
+            return capi.Input.KeyboardKeyState[(int)GlKeys.AltLeft] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.AltRight] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.LAlt] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.RAlt];
+        }
+
+        private bool IsCtrlDown() {
+            return capi.Input.KeyboardKeyState[(int)GlKeys.ControlLeft] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.ControlRight] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.LControl] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.RControl];
+        }
+
+        private bool IsShiftDown() {
+            return capi.Input.KeyboardKeyState[(int)GlKeys.ShiftLeft] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.ShiftRight] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.LShift] ||
+                capi.Input.KeyboardKeyState[(int)GlKeys.RShift];
+        }
+
         public override void OnRenderGUI(float deltaTime) {
-            if (capi.Input.KeyboardKeyState[(int)GlKeys.Tab]) {
+            if (IsKeyComboActive()) {
                 base.OnRenderGUI(deltaTime);
             }
         }
