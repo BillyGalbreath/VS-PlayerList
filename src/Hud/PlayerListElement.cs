@@ -16,8 +16,8 @@ internal class PlayerListElement : HudElement {
         ElementBounds bounds = new() {
             Alignment = EnumDialogArea.CenterFixed,
             BothSizing = ElementSizing.FitToChildren,
-            fixedWidth = 200,
-            fixedHeight = 60,
+            fixedWidth = 300,
+            fixedHeight = 120,
             fixedY = 50
         };
 
@@ -32,9 +32,9 @@ internal class PlayerListElement : HudElement {
             .CreateCompo("playerlist:thelist", bounds)
             .AddShadedDialogBG(ElementBounds.Fill)
             .BeginChildElements(bounds)
-                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 0, 200, 20))
-                .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 0, 200, 20))
-                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 0, 200, 20))
+                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 0, 200, 40))
+                .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 0, 200, 40))
+                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 0, 200, 40))
             .EndChildElements()
             .Compose();
 
