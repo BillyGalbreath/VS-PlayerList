@@ -24,7 +24,7 @@ internal class PlayerListElement : HudElement {
         CairoFont font = new() {
             Color = (double[])GuiStyle.DialogDefaultTextColor.Clone(),
             Fontname = GuiStyle.StandardFontName,
-            UnscaledFontsize = GuiStyle.NormalFontSize,
+            UnscaledFontsize = GuiStyle.SmallFontSize,
             Orientation = EnumTextOrientation.Center
         };
 
@@ -32,9 +32,9 @@ internal class PlayerListElement : HudElement {
             .CreateCompo("playerlist:thelist", bounds)
             .AddShadedDialogBG(ElementBounds.Fill)
             .BeginChildElements(bounds)
-                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 0, 200, 40))
-                .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 0, 200, 40))
-                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 0, 200, 40))
+                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 20, 200, 20))
+                .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 40, 200, 20))
+                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 60, 200, 20))
             .EndChildElements()
             .Compose();
 
