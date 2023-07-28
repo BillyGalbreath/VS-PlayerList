@@ -1,4 +1,6 @@
-﻿using Vintagestory.API.Client;
+﻿using System.Collections.Generic;
+using Vintagestory.API.Client;
+using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 
 namespace PlayerList.Hud;
@@ -7,12 +9,41 @@ internal class PlayerListElement : HudElement {
     private bool isTabDown;
 
     public PlayerListElement(ICoreClientAPI api) : base(api) {
-        //listenerId = capi.Event.RegisterGameTickListener(OnGameTick, 20);
+        capi.Event.PlayerJoin += OnPlayerJoin;
+        capi.Event.PlayerLeave += OnPlayerLeave;
 
         ComposeGuis();
     }
 
-    public void ComposeGuis() {
+    private void OnPlayerJoin(IPlayer player) {
+        ComposeGuis();
+    }
+
+    private void OnPlayerLeave(IPlayer player) {
+        ComposeGuis();
+    }
+
+    private void ComposeGuis() {
+        List<string> players = new();
+
+        foreach (IPlayer player in capi.World.AllOnlinePlayers) {
+            players.Add(player.PlayerName);
+        }
+
+        /*players.Add("Billy");
+        players.Add("Chrysti");
+        players.Add("JoeSchmoe");
+        players.Add("kaii");
+        players.Add("BlazeAttack");
+        players.Add("Lazer2004");
+        players.Add("fedoratheexplorer");*/
+
+        players.Sort();
+
+        int i = -10;
+        int fontHeight = 20;
+        int width = 200;
+
         CairoFont font = new() {
             Color = (double[])GuiStyle.DialogDefaultTextColor.Clone(),
             Fontname = GuiStyle.StandardFontName,
@@ -20,24 +51,21 @@ internal class PlayerListElement : HudElement {
             Orientation = EnumTextOrientation.Center
         };
 
-        Composers["playerlist"] = capi.Gui
-            .CreateCompo("playerlist:thelist", new ElementBounds {
+        GuiComposer composer = capi.Gui
+            .CreateCompo("playerlist:thelist", new() {
                 Alignment = EnumDialogArea.CenterTop,
-                BothSizing = ElementSizing.FitToChildren
-            }.WithFixedAlignmentOffset(0, 100))
-            .AddShadedDialogBG(ElementBounds.Fill)
-            .BeginChildElements(new ElementBounds {
-                Alignment = EnumDialogArea.CenterFixed,
                 BothSizing = ElementSizing.Fixed,
-                fixedWidth = 250,
-                fixedHeight = 250,
-                fixedY = 50
+                fixedWidth = width,
+                fixedHeight = fontHeight * players.Count + fontHeight,
+                fixedOffsetY = 100
             })
-                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 50, 300, 20))
-                .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 70, 300, 20))
-                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 90, 300, 20))
-            .EndChildElements()
-            .Compose();
+            .AddDialogBG(ElementBounds.Fill, false)
+            .BeginChildElements();
+        foreach (string player in players) {
+            composer.AddStaticText(player, font, ElementBounds.Fixed(EnumDialogArea.LeftTop, 0, i += 20, width, fontHeight));
+        }
+        composer.EndChildElements();
+        Composers["playerlist"] = composer.Compose();
 
         TryOpen();
     }
@@ -80,6 +108,7 @@ internal class PlayerListElement : HudElement {
     public override void Dispose() {
         base.Dispose();
 
-        //capi.Event.UnregisterGameTickListener(listenerId);
+        capi.Event.PlayerJoin -= OnPlayerJoin;
+        capi.Event.PlayerLeave -= OnPlayerLeave;
     }
 }
