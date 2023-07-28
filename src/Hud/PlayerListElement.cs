@@ -32,9 +32,9 @@ internal class PlayerListElement : HudElement {
             .CreateCompo("playerlist:thelist", bounds)
             .AddShadedDialogBG(ElementBounds.Fill)
             .BeginChildElements(bounds)
-                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 20, 200, 20))
-                .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 40, 200, 20))
-                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 60, 200, 20))
+                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 40, 300, 20))
+                .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 70, 300, 20))
+                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 80, 300, 20))
             .EndChildElements()
             .Compose();
 
