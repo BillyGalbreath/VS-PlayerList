@@ -4,39 +4,37 @@ using Vintagestory.API.Config;
 namespace PlayerList.Hud;
 
 internal class PlayerListElement : HudElement {
-    private readonly long listenerId;
-
     private bool isTabDown;
 
     public PlayerListElement(ICoreClientAPI api) : base(api) {
-        listenerId = capi.Event.RegisterGameTickListener(OnGameTick, 20);
+        //listenerId = capi.Event.RegisterGameTickListener(OnGameTick, 20);
 
         ComposeGuis();
     }
 
-    private void OnGameTick(float dt) {
-        Update();
-    }
-
-
-    void Update() {
-        //
-    }
-
     public void ComposeGuis() {
-        ElementBounds bounds = new ElementBounds() {
+        ElementBounds bounds = new() {
             Alignment = EnumDialogArea.CenterFixed,
-            BothSizing = ElementSizing.Fixed,
+            BothSizing = ElementSizing.FitToChildren,
             fixedWidth = 200,
-            fixedHeight = 50,
-            fixedY = 10
-        }.WithFixedAlignmentOffset(0, 5);
+            fixedHeight = 60,
+            fixedY = 50
+        };
+
+        CairoFont font = new() {
+            Color = (double[])GuiStyle.DialogDefaultTextColor.Clone(),
+            Fontname = GuiStyle.StandardFontName,
+            UnscaledFontsize = GuiStyle.NormalFontSize,
+            Orientation = EnumTextOrientation.Center
+        };
 
         Composers["playerlist"] = capi.Gui
-            .CreateCompo("playerlist:thelist", bounds.FlatCopy().FixedGrow(0, 20))
+            .CreateCompo("playerlist:thelist", bounds)
             .AddShadedDialogBG(ElementBounds.Fill)
             .BeginChildElements(bounds)
-                .AddStaticText(Lang.Get("test"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 0, 200, 20))
+                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 0, 200, 20))
+                .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 0, 200, 20))
+                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 0, 200, 20))
             .EndChildElements()
             .Compose();
 
@@ -81,6 +79,6 @@ internal class PlayerListElement : HudElement {
     public override void Dispose() {
         base.Dispose();
 
-        capi.Event.UnregisterGameTickListener(listenerId);
+        //capi.Event.UnregisterGameTickListener(listenerId);
     }
 }
