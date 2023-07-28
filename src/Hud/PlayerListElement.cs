@@ -13,14 +13,6 @@ internal class PlayerListElement : HudElement {
     }
 
     public void ComposeGuis() {
-        ElementBounds bounds = new() {
-            Alignment = EnumDialogArea.CenterFixed,
-            BothSizing = ElementSizing.Fixed,
-            fixedWidth = 300,
-            fixedHeight = 120,
-            fixedY = 50
-        };
-
         CairoFont font = new() {
             Color = (double[])GuiStyle.DialogDefaultTextColor.Clone(),
             Fontname = GuiStyle.StandardFontName,
@@ -29,12 +21,21 @@ internal class PlayerListElement : HudElement {
         };
 
         Composers["playerlist"] = capi.Gui
-            .CreateCompo("playerlist:thelist", bounds)
+            .CreateCompo("playerlist:thelist", new ElementBounds {
+                Alignment = EnumDialogArea.CenterTop,
+                BothSizing = ElementSizing.FitToChildren
+            }.WithFixedAlignmentOffset(0, 100))
             .AddShadedDialogBG(ElementBounds.Fill)
-            .BeginChildElements(bounds)
-                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 40, 300, 20))
+            .BeginChildElements(new ElementBounds {
+                Alignment = EnumDialogArea.CenterFixed,
+                BothSizing = ElementSizing.Fixed,
+                fixedWidth = 250,
+                fixedHeight = 250,
+                fixedY = 50
+            })
+                .AddStaticText("Billy", font, ElementBounds.Fixed(0, 50, 300, 20))
                 .AddStaticText("Chrysti", font, ElementBounds.Fixed(0, 70, 300, 20))
-                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 80, 300, 20))
+                .AddStaticText("JoeSchmoe", font, ElementBounds.Fixed(0, 90, 300, 20))
             .EndChildElements()
             .Compose();
 
