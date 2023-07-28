@@ -15,7 +15,7 @@ internal class PlayerListElement : HudElement {
     public void ComposeGuis() {
         ElementBounds bounds = new() {
             Alignment = EnumDialogArea.CenterFixed,
-            BothSizing = ElementSizing.FitToChildren,
+            BothSizing = ElementSizing.Fixed,
             fixedWidth = 300,
             fixedHeight = 120,
             fixedY = 50
