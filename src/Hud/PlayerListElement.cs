@@ -6,7 +6,7 @@ namespace PlayerList.Hud;
 internal class PlayerListElement : HudElement {
     private readonly long listenerId;
 
-    private bool tabIsDown;
+    private bool isTabDown;
 
     public PlayerListElement(ICoreClientAPI api) : base(api) {
         listenerId = capi.Event.RegisterGameTickListener(OnGameTick, 20);
@@ -27,15 +27,16 @@ internal class PlayerListElement : HudElement {
         ElementBounds bounds = new ElementBounds() {
             Alignment = EnumDialogArea.CenterFixed,
             BothSizing = ElementSizing.Fixed,
-            fixedWidth = 850,
+            fixedWidth = 200,
             fixedHeight = 50,
             fixedY = 10
         }.WithFixedAlignmentOffset(0, 5);
 
         Composers["playerlist"] = capi.Gui
             .CreateCompo("playerlist:thelist", bounds.FlatCopy().FixedGrow(0, 20))
+            .AddShadedDialogBG(ElementBounds.Fill)
             .BeginChildElements(bounds)
-                    .AddStaticText(Lang.Get("test"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 0, 200, 20))
+                .AddStaticText(Lang.Get("test"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 0, 200, 20))
             .EndChildElements()
             .Compose();
 
@@ -43,7 +44,7 @@ internal class PlayerListElement : HudElement {
     }
 
     public override void OnRenderGUI(float deltaTime) {
-        if (tabIsDown) {
+        if (isTabDown) {
             base.OnRenderGUI(deltaTime);
         }
     }
@@ -62,17 +63,15 @@ internal class PlayerListElement : HudElement {
     }
 
     public override void OnKeyDown(KeyEvent args) {
-        int key = args.KeyCode;
-        int? key2 = args.KeyCode2;
-
-        capi.SendChatMessage($"KEY DOWN --> Key: {key} Key2: {key2}");
+        if (args.KeyCode == 52 || args.KeyCode2 == 52) {
+            isTabDown = true;
+        }
     }
 
     public override void OnKeyUp(KeyEvent args) {
-        int key = args.KeyCode;
-        int? key2 = args.KeyCode2;
-
-        capi.SendChatMessage($"KEY UP --> Key: {key} Key2: {key2}");
+        if (args.KeyCode == 52 || args.KeyCode2 == 52) {
+            isTabDown = false;
+        }
     }
 
     public override bool TryClose() {
