@@ -6,9 +6,9 @@
   "description": "View the player list on Vintage Story servers",
   "website": "https://github.com/BillyGalbreath/VS-PlayerList",
   "authors": [ "BillyGalbreath" ],
-  "side": "Universal",
+  "side": "Client",
   "requiredOnClient": true,
-  "requiredOnServer": true,
+  "requiredOnServer": false,
   "dependency": {
     "game": "1.18.0"
   }
