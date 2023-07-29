@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Util;
 
 namespace PlayerList.Client.Hud;
 
 public class PlayerListHud : HudElement {
+    public static readonly CairoFont DEFAULT_FONT = new() {
+        Color = (double[])GuiStyle.DialogDefaultTextColor.Clone(),
+        Fontname = GuiStyle.StandardFontName,
+        UnscaledFontsize = GuiStyle.SmallFontSize,
+        Orientation = EnumTextOrientation.Left
+    };
+
     private readonly PlayerListClient client;
     private readonly int fontHeight;
     private readonly int width;
@@ -64,13 +72,6 @@ public class PlayerListHud : HudElement {
             .OrderBy(player => player.PlayerName)
             .ToList();
 
-        CairoFont font = new() {
-            Color = (double[])GuiStyle.DialogDefaultTextColor.Clone(),
-            Fontname = GuiStyle.StandardFontName,
-            UnscaledFontsize = GuiStyle.SmallFontSize,
-            Orientation = EnumTextOrientation.Left
-        };
-
         GuiComposer composer = capi.Gui
             .CreateCompo("playerlist:thelist", new() {
                 Alignment = EnumDialogArea.CenterTop,
@@ -84,7 +85,16 @@ public class PlayerListHud : HudElement {
 
         int i = -10;
         foreach (IPlayer player in players) {
-            composer.AddStaticText(player.PlayerName, font, ElementBounds.Fixed(EnumDialogArea.LeftTop, fontHeight / 2D, i += fontHeight, width, fontHeight));
+            composer.AddStaticText(
+                player.PlayerName,
+                player.Entitlements?.Count > 0 && GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[] color) ?
+                new() {
+                    Color = color,
+                    Fontname = GuiStyle.StandardFontName,
+                    UnscaledFontsize = GuiStyle.SmallFontSize,
+                    Orientation = EnumTextOrientation.Left
+                } : DEFAULT_FONT,
+                ElementBounds.Fixed(EnumDialogArea.LeftTop, fontHeight / 2D, i += fontHeight, width, fontHeight));
             composer.AddImage(ElementBounds.Fixed(EnumDialogArea.LeftTop, width, i, fontHeight, fontHeight), PingIcon.Get(client.Pings.Get(player.PlayerUID, -1)));
         }
 
