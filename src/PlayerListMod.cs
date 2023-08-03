@@ -1,4 +1,4 @@
-﻿using PlayerList.Client;
+using PlayerList.Client;
 using PlayerList.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;

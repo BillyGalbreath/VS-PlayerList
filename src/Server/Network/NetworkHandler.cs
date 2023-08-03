@@ -1,4 +1,4 @@
-﻿using PlayerList.Common.Network;
+using PlayerList.Common.Network;
 using Vintagestory.API.Server;
 
 namespace PlayerList.Server.Network;

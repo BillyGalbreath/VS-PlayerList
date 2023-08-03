@@ -1,4 +1,4 @@
-﻿using PlayerList.Client.Hud;
+using PlayerList.Client.Hud;
 using PlayerList.Client.Network;
 using System.Collections.Generic;
 using Vintagestory.API.Client;

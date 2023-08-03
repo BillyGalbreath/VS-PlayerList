@@ -1,4 +1,4 @@
-﻿using PlayerList.Common.Network;
+using PlayerList.Common.Network;
 
 namespace PlayerList.Client.Network;
 
