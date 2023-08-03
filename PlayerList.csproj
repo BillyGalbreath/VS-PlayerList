@@ -15,7 +15,8 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="VintagestoryLib">
-      <HintPath>..\..\..\AppData\Roaming\Vintagestory\VintagestoryLib.dll</HintPath>
+      <HintPath>$(VINTAGE_STORY)/VintagestoryLib.dll</HintPath>
+	  <Private>false</Private>
     </Reference>
   </ItemGroup>
   
