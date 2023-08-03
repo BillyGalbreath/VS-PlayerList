@@ -1,23 +1,21 @@
-using PlayerList.Client;
-using PlayerList.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Server;
 
 namespace PlayerList;
 
 public class PlayerListMod : ModSystem {
-    private PlayerListClient client;
-    private PlayerListServer server;
+    private PlayerListHud hud;
+    private KeyHandler keyHandler;
 
     public override bool AllowRuntimeReload => true;
 
-    public override void StartClientSide(ICoreClientAPI api) {
-        client = new PlayerListClient(api);
+    public override bool ShouldLoad(EnumAppSide forSide) {
+        return forSide.IsClient();
     }
 
-    public override void StartServerSide(ICoreServerAPI api) {
-        server = new PlayerListServer(api);
+    public override void StartClientSide(ICoreClientAPI api) {
+        keyHandler = new KeyHandler(api);
+        hud = new PlayerListHud(keyHandler, api);
     }
 
     public override double ExecuteOrder() {
@@ -25,7 +23,7 @@ public class PlayerListMod : ModSystem {
     }
 
     public override void Dispose() {
-        client?.Dispose();
-        server?.Dispose();
+        hud.Dispose();
+        keyHandler.Dispose();
     }
 }

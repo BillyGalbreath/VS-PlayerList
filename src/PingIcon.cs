@@ -1,6 +1,6 @@
 using Vintagestory.API.Common;
 
-namespace PlayerList.Client.Hud;
+namespace PlayerList;
 
 public class PingIcon {
     public static readonly AssetLocation UNKNOWN = new("playerlist", "textures/ping_0.png");

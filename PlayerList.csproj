@@ -14,6 +14,9 @@
       <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="VintagestoryLib">
+      <HintPath>..\..\..\AppData\Roaming\Vintagestory\VintagestoryLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
@@ -27,5 +30,5 @@
   <Target Name="Package" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
     <ZipDirectory DestinationFile="bin/$(TargetName).zip" SourceDirectory="$(TargetDir)" Overwrite="true" />
   </Target>
-
+  
 </Project>
