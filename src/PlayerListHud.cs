@@ -27,14 +27,10 @@ public class PlayerListHud : HudElement {
 
         capi.Event.PlayerJoin += UpdateList;
         capi.Event.PlayerLeave += UpdateList;
-
-        UpdateList();
     }
 
-    public override void OnRenderGUI(float deltaTime) {
-        if (keyHandler.IsKeyComboActive()) {
-            base.OnRenderGUI(deltaTime);
-        }
+    public override void OnOwnPlayerDataReceived() {
+        UpdateList();
     }
 
     public void UpdateList(IPlayer notUsed = null) {
@@ -74,15 +70,89 @@ public class PlayerListHud : HudElement {
         TryOpen();
     }
 
-    public override bool ShouldReceiveKeyboardEvents() { return false; }
+    public override double InputOrder {
+        get {
+            return 1.05;
+        }
+    }
 
-    public override double InputOrder { get { return 1; } }
+    public override double DrawOrder {
+        get {
+            return 0.88;
+        }
+    }
 
-    public override bool Focusable => false;
+    public override float ZSize => 50F;
 
-    protected override void OnFocusChanged(bool on) { }
+    public override bool ShouldReceiveRenderEvents() {
+        return keyHandler.IsKeyComboActive();
+    }
 
-    public override bool TryClose() { return false; }
+    public override void OnFinalizeFrame(float dt) {
+        base.OnFinalizeFrame(dt);
+    }
+
+    public override bool ShouldReceiveKeyboardEvents() {
+        return true;
+    }
+
+    public override void OnKeyDown(KeyEvent args) {
+    }
+
+    public override void OnKeyPress(KeyEvent args) {
+    }
+
+    public override void OnKeyUp(KeyEvent args) {
+    }
+
+    public override bool OnEscapePressed() {
+        return false;
+    }
+
+    public override bool ShouldReceiveMouseEvents() {
+        return true;
+    }
+
+    public override void OnMouseDown(MouseEvent args) {
+    }
+
+    public override void OnMouseUp(MouseEvent args) {
+    }
+
+    public override void OnMouseMove(MouseEvent args) {
+    }
+
+    public override void OnMouseWheel(MouseWheelEventArgs args) {
+    }
+
+    public override bool OnMouseEnterSlot(ItemSlot slot) {
+        return false;
+    }
+
+    public override bool OnMouseLeaveSlot(ItemSlot itemSlot) {
+        return false;
+    }
+
+    public override bool CaptureAllInputs() {
+        return false;
+    }
+
+    public override bool TryClose() {
+        return false;
+    }
+
+    public override void Toggle() {
+    }
+
+    public override void UnFocus() {
+    }
+
+    public override void Focus() {
+    }
+
+    protected override void OnFocusChanged(bool on) {
+        focused = false;
+    }
 
     public override void Dispose() {
         base.Dispose();
