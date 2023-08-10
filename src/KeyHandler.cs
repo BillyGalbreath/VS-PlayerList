@@ -4,7 +4,7 @@ using Vintagestory.API.Common;
 namespace PlayerList;
 
 public class KeyHandler {
-    private readonly ICoreClientAPI api;
+    public readonly ICoreClientAPI api;
     private readonly ActionConsumable<KeyCombination> vanillaKeyHandler;
 
     public KeyHandler(ICoreClientAPI api) {

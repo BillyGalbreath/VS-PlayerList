@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vintagestory.API.Client;
@@ -26,9 +27,16 @@ public class PlayerListHud : HudElement {
 
         fontHeight = 25;
         width = 200 - fontHeight;
+
+        capi.Event.PlayerJoin += UpdateList;
+        capi.Event.PlayerLeave += UpdateList;
     }
 
-    public void UpdateList() {
+    public override void OnOwnPlayerDataReceived() {
+        UpdateList();
+    }
+
+    public void UpdateList(IPlayer notUsed = null) {
         List<IPlayer> players = capi.World.AllOnlinePlayers
             .OrderBy(player => player.PlayerName)
             .ToList();
@@ -154,5 +162,14 @@ public class PlayerListHud : HudElement {
 
     protected override void OnFocusChanged(bool on) {
         focused = false;
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        capi.Event.PlayerJoin -= UpdateList;
+        capi.Event.PlayerLeave -= UpdateList;
+
+        GC.SuppressFinalize(this);
     }
 }
