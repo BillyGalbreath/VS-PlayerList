@@ -15,29 +15,31 @@ public class PlayerListHud : HudElement {
         UnscaledFontsize = GuiStyle.SmallFontSize,
         Orientation = EnumTextOrientation.Left
     };
+
     private readonly KeyHandler keyHandler;
     private readonly int fontHeight;
     private readonly int width;
+
+    private bool wasOpen = false;
 
     public PlayerListHud(KeyHandler keyHandler, ICoreClientAPI api) : base(api) {
         this.keyHandler = keyHandler;
 
         fontHeight = 25;
         width = 200 - fontHeight;
-
-        capi.Event.PlayerJoin += UpdateList;
-        capi.Event.PlayerLeave += UpdateList;
     }
 
-    public override void OnOwnPlayerDataReceived() {
-        UpdateList();
-    }
-
-    public void UpdateList(IPlayer notUsed = null) {
+    public void UpdateList() {
         List<IPlayer> players = capi.World.AllOnlinePlayers
             .OrderBy(player => player.PlayerName)
             .ToList();
 
+        Composers["playerlist"] = Compose(players).Compose();
+
+        TryOpen();
+    }
+
+    private GuiComposer Compose(List<IPlayer> players) {
         GuiComposer composer = capi.Gui
             .CreateCompo("playerlist:thelist", new() {
                 Alignment = EnumDialogArea.CenterTop,
@@ -64,10 +66,7 @@ public class PlayerListHud : HudElement {
             composer.AddImage(ElementBounds.Fixed(EnumDialogArea.LeftTop, width, i, fontHeight, fontHeight), PingIcon.Get(((ClientPlayer)player).Ping));
         }
 
-        composer.EndChildElements();
-        Composers["playerlist"] = composer.Compose();
-
-        TryOpen();
+        return composer.EndChildElements();
     }
 
     public override double InputOrder {
@@ -85,7 +84,11 @@ public class PlayerListHud : HudElement {
     public override float ZSize => 50F;
 
     public override bool ShouldReceiveRenderEvents() {
-        return keyHandler.IsKeyComboActive();
+        bool shouldOpen = keyHandler.IsKeyComboActive();
+        if (shouldOpen && !wasOpen) {
+            UpdateList();
+        }
+        return wasOpen = shouldOpen;
     }
 
     public override void OnFinalizeFrame(float dt) {
@@ -152,14 +155,5 @@ public class PlayerListHud : HudElement {
 
     protected override void OnFocusChanged(bool on) {
         focused = false;
-    }
-
-    public override void Dispose() {
-        base.Dispose();
-
-        capi.Event.PlayerJoin -= UpdateList;
-        capi.Event.PlayerLeave -= UpdateList;
-
-        GC.SuppressFinalize(this);
     }
 }
