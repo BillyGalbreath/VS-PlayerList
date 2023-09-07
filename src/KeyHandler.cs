@@ -1,5 +1,6 @@
 ﻿using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 
 namespace PlayerList;
 
@@ -10,7 +11,7 @@ public class KeyHandler {
     public KeyHandler(ICoreClientAPI api) {
         this.api = api;
 
-        api.Input.RegisterHotKey("playerlist", "Hold to show the player list", GlKeys.Tab, HotkeyType.GUIOrOtherControls);
+        api.Input.RegisterHotKey("playerlist", Lang.Get("playerlist:keybind-description"), GlKeys.Tab, HotkeyType.GUIOrOtherControls);
         api.Input.SetHotKeyHandler("playerlist", combo => true);
 
         vanillaKeyHandler = api.Input.GetHotKeyByCode("chatdialog").Handler;
