@@ -2,12 +2,12 @@ using Vintagestory.API.Common;
 
 namespace PlayerList;
 
-public class PingIcon {
-    public static readonly AssetLocation UNKNOWN = new("playerlist", "textures/ping_0.png");
-    public static readonly AssetLocation BAD = new("playerlist", "textures/ping_1.png");
-    public static readonly AssetLocation POOR = new("playerlist", "textures/ping_2.png");
-    public static readonly AssetLocation GOOD = new("playerlist", "textures/ping_3.png");
-    public static readonly AssetLocation BEST = new("playerlist", "textures/ping_4.png");
+public abstract class PingIcon {
+    private static readonly AssetLocation UNKNOWN = new("playerlist", "textures/ping_0.png");
+    private static readonly AssetLocation BAD = new("playerlist", "textures/ping_1.png");
+    private static readonly AssetLocation POOR = new("playerlist", "textures/ping_2.png");
+    private static readonly AssetLocation GOOD = new("playerlist", "textures/ping_3.png");
+    private static readonly AssetLocation BEST = new("playerlist", "textures/ping_4.png");
 
     public static AssetLocation Get(float ping) {
         return ping switch {

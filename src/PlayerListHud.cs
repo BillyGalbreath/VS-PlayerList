@@ -9,7 +9,7 @@ using Vintagestory.Client.NoObf;
 namespace PlayerList;
 
 public class PlayerListHud : HudElement {
-    public static readonly CairoFont DEFAULT_FONT = new() {
+    private static readonly CairoFont DEFAULT_FONT = new() {
         Color = (double[])GuiStyle.DialogDefaultTextColor.Clone(),
         Fontname = GuiStyle.StandardFontName,
         UnscaledFontsize = GuiStyle.SmallFontSize,
@@ -20,7 +20,7 @@ public class PlayerListHud : HudElement {
     private readonly int fontHeight;
     private readonly int width;
 
-    private bool wasOpen = false;
+    private bool wasOpen;
 
     public PlayerListHud(KeyHandler keyHandler, ICoreClientAPI api) : base(api) {
         this.keyHandler = keyHandler;
@@ -36,7 +36,7 @@ public class PlayerListHud : HudElement {
         UpdateList();
     }
 
-    public void UpdateList(IPlayer notUsed = null) {
+    private void UpdateList(IPlayer? notUsed = null) {
         List<IPlayer> players = capi.World.AllOnlinePlayers
             .OrderBy(player => player.PlayerName)
             .ToList();
@@ -48,7 +48,7 @@ public class PlayerListHud : HudElement {
 
     private GuiComposer Compose(List<IPlayer> players) {
         GuiComposer composer = capi.Gui
-            .CreateCompo("playerlist:thelist", new() {
+            .CreateCompo("playerlist:thelist", new ElementBounds {
                 Alignment = EnumDialogArea.CenterTop,
                 BothSizing = ElementSizing.Fixed,
                 fixedWidth = width + fontHeight,
@@ -62,13 +62,14 @@ public class PlayerListHud : HudElement {
         foreach (IPlayer player in players) {
             composer.AddStaticText(
                 player.PlayerName,
-                player.Entitlements?.Count > 0 && GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[] color) ?
-                new() {
-                    Color = color,
-                    Fontname = GuiStyle.StandardFontName,
-                    UnscaledFontsize = GuiStyle.SmallFontSize,
-                    Orientation = EnumTextOrientation.Left
-                } : DEFAULT_FONT,
+                player.Entitlements?.Count > 0 && GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[]? color)
+                    ? new CairoFont {
+                        Color = color,
+                        Fontname = GuiStyle.StandardFontName,
+                        UnscaledFontsize = GuiStyle.SmallFontSize,
+                        Orientation = EnumTextOrientation.Left
+                    }
+                    : DEFAULT_FONT,
                 ElementBounds.Fixed(EnumDialogArea.LeftTop, fontHeight / 2D, i += fontHeight, width, fontHeight));
             composer.AddImage(ElementBounds.Fixed(EnumDialogArea.LeftTop, width, i, fontHeight, fontHeight), PingIcon.Get(((ClientPlayer)player).Ping));
         }
@@ -76,17 +77,9 @@ public class PlayerListHud : HudElement {
         return composer.EndChildElements();
     }
 
-    public override double InputOrder {
-        get {
-            return 1.05;
-        }
-    }
+    public override double InputOrder => 1.05;
 
-    public override double DrawOrder {
-        get {
-            return 0.88;
-        }
-    }
+    public override double DrawOrder => 0.88;
 
     public override float ZSize => 50F;
 
@@ -95,25 +88,19 @@ public class PlayerListHud : HudElement {
         if (shouldOpen && !wasOpen) {
             UpdateList();
         }
-        return wasOpen = shouldOpen;
-    }
 
-    public override void OnFinalizeFrame(float dt) {
-        base.OnFinalizeFrame(dt);
+        return wasOpen = shouldOpen;
     }
 
     public override bool ShouldReceiveKeyboardEvents() {
         return true;
     }
 
-    public override void OnKeyDown(KeyEvent args) {
-    }
+    public override void OnKeyDown(KeyEvent args) { }
 
-    public override void OnKeyPress(KeyEvent args) {
-    }
+    public override void OnKeyPress(KeyEvent args) { }
 
-    public override void OnKeyUp(KeyEvent args) {
-    }
+    public override void OnKeyUp(KeyEvent args) { }
 
     public override bool OnEscapePressed() {
         return false;
@@ -123,17 +110,13 @@ public class PlayerListHud : HudElement {
         return true;
     }
 
-    public override void OnMouseDown(MouseEvent args) {
-    }
+    public override void OnMouseDown(MouseEvent args) { }
 
-    public override void OnMouseUp(MouseEvent args) {
-    }
+    public override void OnMouseUp(MouseEvent args) { }
 
-    public override void OnMouseMove(MouseEvent args) {
-    }
+    public override void OnMouseMove(MouseEvent args) { }
 
-    public override void OnMouseWheel(MouseWheelEventArgs args) {
-    }
+    public override void OnMouseWheel(MouseWheelEventArgs args) { }
 
     public override bool OnMouseEnterSlot(ItemSlot slot) {
         return false;
@@ -151,14 +134,11 @@ public class PlayerListHud : HudElement {
         return false;
     }
 
-    public override void Toggle() {
-    }
+    public override void Toggle() { }
 
-    public override void UnFocus() {
-    }
+    public override void UnFocus() { }
 
-    public override void Focus() {
-    }
+    public override void Focus() { }
 
     protected override void OnFocusChanged(bool on) {
         focused = false;

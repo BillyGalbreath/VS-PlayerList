@@ -4,8 +4,8 @@ using Vintagestory.API.Common;
 namespace PlayerList;
 
 public class PlayerListMod : ModSystem {
-    private PlayerListHud hud;
-    private KeyHandler keyHandler;
+    private PlayerListHud? hud;
+    private KeyHandler? keyHandler;
 
     public override bool AllowRuntimeReload => true;
 
@@ -23,7 +23,7 @@ public class PlayerListMod : ModSystem {
     }
 
     public override void Dispose() {
-        hud.Dispose();
-        keyHandler.Dispose();
+        hud?.Dispose();
+        keyHandler?.Dispose();
     }
 }
