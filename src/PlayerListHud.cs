@@ -20,6 +20,7 @@ public class PlayerListHud : HudElement {
     private readonly int fontHeight;
     private readonly int width;
 
+    private long gameTickListenerId;
     private bool wasOpen;
 
     public PlayerListHud(KeyHandler keyHandler, ICoreClientAPI api) : base(api) {
@@ -85,8 +86,14 @@ public class PlayerListHud : HudElement {
 
     public override bool ShouldReceiveRenderEvents() {
         bool shouldOpen = keyHandler.IsKeyComboActive();
-        if (shouldOpen && !wasOpen) {
-            UpdateList();
+        switch (shouldOpen) {
+            case true when !wasOpen:
+                gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000, 1000);
+                UpdateList();
+                break;
+            case false when wasOpen:
+                capi.Event.UnregisterGameTickListener(gameTickListenerId);
+                break;
         }
 
         return wasOpen = shouldOpen;
@@ -146,6 +153,8 @@ public class PlayerListHud : HudElement {
 
     public override void Dispose() {
         base.Dispose();
+
+        capi.Event.UnregisterGameTickListener(gameTickListenerId);
 
         capi.Event.PlayerJoin -= UpdateList;
         capi.Event.PlayerLeave -= UpdateList;
