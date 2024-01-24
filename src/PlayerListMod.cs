@@ -1,29 +1,21 @@
+using System.Diagnostics.CodeAnalysis;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
 namespace PlayerList;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public class PlayerListMod : ModSystem {
-    private PlayerListHud? hud;
-    private KeyHandler? keyHandler;
-
-    public override bool AllowRuntimeReload => true;
-
-    public override bool ShouldLoad(EnumAppSide forSide) {
-        return forSide.IsClient();
-    }
+    private PlayerListHud? _hud;
+    private KeyHandler? _keyHandler;
 
     public override void StartClientSide(ICoreClientAPI api) {
-        keyHandler = new KeyHandler(api);
-        hud = new PlayerListHud(keyHandler, api);
-    }
-
-    public override double ExecuteOrder() {
-        return 0.3;
+        _keyHandler = new KeyHandler(api);
+        _hud = new PlayerListHud(_keyHandler, api);
     }
 
     public override void Dispose() {
-        hud?.Dispose();
-        keyHandler?.Dispose();
+        _hud?.Dispose();
+        _keyHandler?.Dispose();
     }
 }

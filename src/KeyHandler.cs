@@ -5,19 +5,19 @@ using Vintagestory.API.Config;
 namespace PlayerList;
 
 public class KeyHandler {
-    private readonly ICoreClientAPI api;
-    private readonly ActionConsumable<KeyCombination> vanillaKeyHandler;
+    private readonly ICoreClientAPI _capi;
+    private readonly ActionConsumable<KeyCombination> _vanillaKeyHandler;
 
-    public KeyHandler(ICoreClientAPI api) {
-        this.api = api;
+    public KeyHandler(ICoreClientAPI capi) {
+        _capi = capi;
 
-        api.Input.RegisterHotKey("playerlist", Lang.Get("playerlist:keybind-description"), GlKeys.Tab, HotkeyType.GUIOrOtherControls);
-        api.Input.SetHotKeyHandler("playerlist", _ => true);
+        capi.Input.RegisterHotKey("playerlist", Lang.Get("playerlist:keybind-description"), GlKeys.Tab, HotkeyType.GUIOrOtherControls);
+        capi.Input.SetHotKeyHandler("playerlist", _ => true);
 
-        vanillaKeyHandler = api.Input.GetHotKeyByCode("chatdialog").Handler;
+        _vanillaKeyHandler = capi.Input.GetHotKeyByCode("chatdialog").Handler;
 
-        api.Input.SetHotKeyHandler("chatdialog", vanillaCombo => {
-            KeyCombination playerlistCombo = api.Input.GetHotKeyByCode("playerlist").CurrentMapping;
+        capi.Input.SetHotKeyHandler("chatdialog", vanillaCombo => {
+            KeyCombination playerlistCombo = capi.Input.GetHotKeyByCode("playerlist").CurrentMapping;
             if (vanillaCombo.KeyCode == playerlistCombo.KeyCode &&
                 vanillaCombo.SecondKeyCode == playerlistCombo.SecondKeyCode &&
                 vanillaCombo.Alt == playerlistCombo.Alt &&
@@ -27,40 +27,40 @@ public class KeyHandler {
                 return true;
             }
 
-            return vanillaKeyHandler(vanillaCombo);
+            return _vanillaKeyHandler(vanillaCombo);
         });
     }
 
-    public void Dispose() {
-        api.Input.SetHotKeyHandler("chatdialog", vanillaKeyHandler);
-    }
-
     public bool IsKeyComboActive() {
-        KeyCombination combo = api.Input.GetHotKeyByCode("playerlist").CurrentMapping;
-        return api.Input.KeyboardKeyState[combo.KeyCode] &&
+        KeyCombination combo = _capi.Input.GetHotKeyByCode("playerlist").CurrentMapping;
+        return _capi.Input.KeyboardKeyState[combo.KeyCode] &&
                IsAltDown() == combo.Alt &&
                IsCtrlDown() == combo.Ctrl &&
                IsShiftDown() == combo.Shift;
     }
 
     private bool IsAltDown() {
-        return api.Input.KeyboardKeyState[(int)GlKeys.AltLeft] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.AltRight] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.LAlt] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.RAlt];
+        return _capi.Input.KeyboardKeyState[(int)GlKeys.AltLeft] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.AltRight] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.LAlt] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.RAlt];
     }
 
     private bool IsCtrlDown() {
-        return api.Input.KeyboardKeyState[(int)GlKeys.ControlLeft] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.ControlRight] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.LControl] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.RControl];
+        return _capi.Input.KeyboardKeyState[(int)GlKeys.ControlLeft] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.ControlRight] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.LControl] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.RControl];
     }
 
     private bool IsShiftDown() {
-        return api.Input.KeyboardKeyState[(int)GlKeys.ShiftLeft] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.ShiftRight] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.LShift] ||
-               api.Input.KeyboardKeyState[(int)GlKeys.RShift];
+        return _capi.Input.KeyboardKeyState[(int)GlKeys.ShiftLeft] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.ShiftRight] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.LShift] ||
+               _capi.Input.KeyboardKeyState[(int)GlKeys.RShift];
+    }
+
+    public void Dispose() {
+        _capi.Input.SetHotKeyHandler("chatdialog", _vanillaKeyHandler);
     }
 }

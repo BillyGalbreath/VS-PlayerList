@@ -1,33 +1,24 @@
-using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Config;
-using Vintagestory.Client.NoObf;
 
 namespace PlayerList;
 
 public class PlayerListHud : HudElement {
-    private static readonly CairoFont DEFAULT_FONT = new() {
-        Color = (double[])GuiStyle.DialogDefaultTextColor.Clone(),
-        Fontname = GuiStyle.StandardFontName,
-        UnscaledFontsize = GuiStyle.SmallFontSize,
-        Orientation = EnumTextOrientation.Left
-    };
+    private readonly KeyHandler _keyHandler;
+    private readonly int _fontHeight;
+    private readonly int _width;
 
-    private readonly KeyHandler keyHandler;
-    private readonly int fontHeight;
-    private readonly int width;
-
-    private long gameTickListenerId;
-    private bool wasOpen;
+    private long _gameTickListenerId;
+    private bool _wasOpen;
 
     public PlayerListHud(KeyHandler keyHandler, ICoreClientAPI api) : base(api) {
-        this.keyHandler = keyHandler;
+        _keyHandler = keyHandler;
 
-        fontHeight = 25;
-        width = 200 - fontHeight;
+        _fontHeight = 25;
+        _width = 250 - _fontHeight;
 
         capi.Event.PlayerJoin += UpdateList;
         capi.Event.PlayerLeave += UpdateList;
@@ -52,8 +43,8 @@ public class PlayerListHud : HudElement {
             .CreateCompo("playerlist:thelist", new ElementBounds {
                 Alignment = EnumDialogArea.CenterTop,
                 BothSizing = ElementSizing.Fixed,
-                fixedWidth = width + fontHeight,
-                fixedHeight = fontHeight * players.Count + fontHeight,
+                fixedWidth = _width + _fontHeight,
+                fixedHeight = _fontHeight * players.Count + _fontHeight,
                 fixedOffsetY = 100
             })
             .AddDialogBG(ElementBounds.Fill, false)
@@ -63,44 +54,38 @@ public class PlayerListHud : HudElement {
         foreach (IPlayer player in players) {
             composer.AddStaticText(
                 player.PlayerName,
-                player.Entitlements?.Count > 0 && GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[]? color)
-                    ? new CairoFont {
-                        Color = color,
-                        Fontname = GuiStyle.StandardFontName,
-                        UnscaledFontsize = GuiStyle.SmallFontSize,
-                        Orientation = EnumTextOrientation.Left
-                    }
-                    : DEFAULT_FONT,
-                ElementBounds.Fixed(EnumDialogArea.LeftTop, fontHeight / 2D, i += fontHeight, width, fontHeight));
-            composer.AddImage(ElementBounds.Fixed(EnumDialogArea.LeftTop, width, i, fontHeight, fontHeight), PingIcon.Get(((ClientPlayer)player).Ping));
+                player.EntitlementColoredFont(),
+                ElementBounds.Fixed(EnumDialogArea.LeftTop, _fontHeight / 2D, i += _fontHeight, _width, _fontHeight));
+            composer.AddImage(ElementBounds.Fixed(EnumDialogArea.LeftTop, _width, i, _fontHeight, _fontHeight), PingIcon.Get(player.Ping()));
         }
 
         return composer.EndChildElements();
     }
 
-    public override double InputOrder => 1.05;
+    public override double InputOrder => 1.0999;
 
-    public override double DrawOrder => 0.88;
+    public override double DrawOrder => 0.8899;
 
-    public override float ZSize => 50F;
+    public override float ZSize => 200F;
 
     public override bool ShouldReceiveRenderEvents() {
-        bool shouldOpen = keyHandler.IsKeyComboActive();
+        bool shouldOpen = _keyHandler.IsKeyComboActive();
+
         switch (shouldOpen) {
-            case true when !wasOpen:
-                gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000, 1000);
+            case true when !_wasOpen:
                 UpdateList();
+                _gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000, 1000);
                 break;
-            case false when wasOpen:
-                capi.Event.UnregisterGameTickListener(gameTickListenerId);
+            case false when _wasOpen:
+                capi.Event.UnregisterGameTickListener(_gameTickListenerId);
                 break;
         }
 
-        return wasOpen = shouldOpen;
+        return _wasOpen = shouldOpen;
     }
 
     public override bool ShouldReceiveKeyboardEvents() {
-        return true;
+        return false;
     }
 
     public override void OnKeyDown(KeyEvent args) { }
@@ -114,7 +99,7 @@ public class PlayerListHud : HudElement {
     }
 
     public override bool ShouldReceiveMouseEvents() {
-        return true;
+        return false;
     }
 
     public override void OnMouseDown(MouseEvent args) { }
@@ -147,18 +132,19 @@ public class PlayerListHud : HudElement {
 
     public override void Focus() { }
 
+    public override bool Focused => false;
+
     protected override void OnFocusChanged(bool on) {
         focused = false;
     }
 
+    [SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize")]
     public override void Dispose() {
         base.Dispose();
 
-        capi.Event.UnregisterGameTickListener(gameTickListenerId);
+        capi.Event.UnregisterGameTickListener(_gameTickListenerId);
 
         capi.Event.PlayerJoin -= UpdateList;
         capi.Event.PlayerLeave -= UpdateList;
-
-        GC.SuppressFinalize(this);
     }
 }
