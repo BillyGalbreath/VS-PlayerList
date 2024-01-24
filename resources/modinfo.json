@@ -8,6 +8,6 @@
   "authors": [ "BillyGalbreath" ],
   "side": "Universal",
   "dependencies": {
-    "game": "1.18.0"
+    "game": "1.18.8"
   }
 }
