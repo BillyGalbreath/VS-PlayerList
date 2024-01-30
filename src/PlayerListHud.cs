@@ -29,7 +29,7 @@ public class PlayerListHud : HudElement {
     }
 
     private void UpdateList(IPlayer? notUsed = null) {
-        List<IPlayer> players = capi.World.AllOnlinePlayers
+        List<IPlayer> players = capi.World.AllOnlinePlayers.ToArray()
             .OrderBy(player => player.PlayerName)
             .ToList();
 
