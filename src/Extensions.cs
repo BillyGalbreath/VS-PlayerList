@@ -14,7 +14,7 @@ public static class Extensions {
     };
 
     public static CairoFont EntitlementColoredFont(this IPlayer player) {
-        return player.Entitlements?.Count > 0 && GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[]? color) ? DefaultFont.WithColor(color) : DefaultFont;
+        return player.Entitlements?.Count > 0 && GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[]? color) ? DefaultFont.Clone().WithColor(color) : DefaultFont;
     }
 
     public static float Ping(this IPlayer player) {
