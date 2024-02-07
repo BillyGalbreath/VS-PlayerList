@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using PlayerList.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
-namespace PlayerList;
+namespace PlayerList.Gui;
 
 public class PlayerListHud : HudElement {
     private readonly KeyHandler _keyHandler;

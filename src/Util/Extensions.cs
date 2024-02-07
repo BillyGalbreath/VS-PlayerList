@@ -3,7 +3,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.Client.NoObf;
 
-namespace PlayerList;
+namespace PlayerList.Util;
 
 public static class Extensions {
     private static readonly CairoFont DefaultFont = new() {

@@ -1,6 +1,7 @@
+using PlayerList.Configuration;
 using Vintagestory.API.Common;
 
-namespace PlayerList;
+namespace PlayerList.Util;
 
 public abstract class PingIcon {
     private static readonly AssetLocation Unknown = new("playerlist", "textures/ping_0.png");
@@ -10,12 +11,21 @@ public abstract class PingIcon {
     private static readonly AssetLocation Best = new("playerlist", "textures/ping_4.png");
 
     public static AssetLocation Get(float ping) {
-        return ping switch {
-            < 0 => Unknown,
-            <= 0.065F => Best,
-            <= 0.125F => Good,
-            <= 0.5F => Poor,
-            _ => Bad
-        };
+        int[]? thresholds = Config.ServerPingThresholds ?? Config.PingThresholds;
+
+        int millis = (int)(ping * 1000);
+        if (thresholds == null || millis < 0) {
+            return Unknown;
+        }
+
+        if (millis <= thresholds[0]) {
+            return Best;
+        }
+
+        if (millis <= thresholds[1]) {
+            return Good;
+        }
+
+        return millis <= thresholds[2] ? Poor : Bad;
     }
 }

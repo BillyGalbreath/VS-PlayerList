@@ -2,7 +2,7 @@
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 
-namespace PlayerList;
+namespace PlayerList.Util;
 
 public class KeyHandler {
     private readonly ICoreClientAPI _capi;

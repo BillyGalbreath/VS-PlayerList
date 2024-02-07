@@ -15,12 +15,13 @@
         <EmbedAllSources>true</EmbedAllSources>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-        <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <DebugType>pdbonly</DebugType>
         <DebugSymbols>true</DebugSymbols>
+        <ExcludeGeneratedDebugSymbol>False</ExcludeGeneratedDebugSymbol>
     </PropertyGroup>
 
     <ItemGroup>
@@ -60,6 +61,10 @@
             <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
             <Private>false</Private>
         </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="YamlDotNet" Version="13.7.1"/>
     </ItemGroup>
 
     <ItemGroup>
