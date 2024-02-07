@@ -2,7 +2,7 @@
   "type": "code",
   "name": "PlayerList",
   "modid": "playerlist",
-  "version": "1.7.4",
+  "version": "1.8.0",
   "description": "View the player list on Vintage Story servers",
   "website": "https://github.com/BillyGalbreath/VS-PlayerList",
   "authors": [ "BillyGalbreath" ],
