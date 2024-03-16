@@ -1,16 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageId>Pl3x.PlayerList</PackageId>
-        <Title>PlayerList</Title>
-        <Authors>BillyGalbreath</Authors>
-        <Company>Pl3x</Company>
-        <Description>View the player list on Vintage Story servers</Description>
-        <Copyright>Copyright © 2024 William Blake Galbreath</Copyright>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
-        <PackageIcon>modicon.png</PackageIcon>
-        <RepositoryUrl>https://github.com/BillyGalbreath/VS-PlayerList</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
         <TargetFramework>net7.0</TargetFramework>
         <EmbedAllSources>true</EmbedAllSources>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -19,9 +9,9 @@
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <DebugType>pdbonly</DebugType>
+        <DebugType>embedded</DebugType>
         <DebugSymbols>true</DebugSymbols>
-        <ExcludeGeneratedDebugSymbol>False</ExcludeGeneratedDebugSymbol>
+        <ExcludeGeneratedDebugSymbol>false</ExcludeGeneratedDebugSymbol>
     </PropertyGroup>
 
     <ItemGroup>
@@ -73,6 +63,12 @@
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
         </None>
     </ItemGroup>
+
+    <Target Name="FilterCopyLocalItems" AfterTargets="ResolvePackageDependenciesForBuild">
+        <ItemGroup>
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' != 'MimeTypes' AND '%(Filename)' != 'YamlDotNet'"/>
+        </ItemGroup>
+    </Target>
 
     <Target Name="Package" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
         <MakeDir Directories="bin/Mods"/>
