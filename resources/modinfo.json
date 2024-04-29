@@ -7,7 +7,9 @@
   "website": "https://github.com/BillyGalbreath/VS-PlayerList",
   "authors": [ "BillyGalbreath" ],
   "side": "Universal",
+  "requiredOnClient": true,
+  "requiredOnServer": false,
   "dependencies": {
-    "game": "1.18.8"
+    "game": "1.19.4"
   }
 }
