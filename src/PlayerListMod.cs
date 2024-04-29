@@ -40,8 +40,13 @@ public class PlayerListMod : ModSystem {
 
     public override void Dispose() {
         _hud?.Dispose();
+        _hud = null;
+
         _keyHandler?.Dispose();
+        _keyHandler = null;
+
         _networkHandler?.Dispose();
+        _networkHandler = null;
 
         Config.Dispose();
 
