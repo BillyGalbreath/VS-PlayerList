@@ -84,12 +84,6 @@ public class PlayerListHud : HudElement {
         return composer.EndChildElements();
     }
 
-    public override double InputOrder => 1.0999;
-
-    public override double DrawOrder => 0.8899;
-
-    public override float ZSize => 200F;
-
     public override bool ShouldReceiveRenderEvents() {
         bool shouldOpen = _keyHandler.IsKeyComboActive();
 
@@ -105,59 +99,28 @@ public class PlayerListHud : HudElement {
         return _wasOpen = shouldOpen;
     }
 
-    public override bool ShouldReceiveKeyboardEvents() {
-        return false;
-    }
-
+    public override double InputOrder => 1.0999;
+    public override double DrawOrder => 0.8899;
+    public override float ZSize => 200F;
+    public override bool ShouldReceiveKeyboardEvents() => false;
     public override void OnKeyDown(KeyEvent args) { }
-
     public override void OnKeyPress(KeyEvent args) { }
-
     public override void OnKeyUp(KeyEvent args) { }
-
-    public override bool OnEscapePressed() {
-        return false;
-    }
-
-    public override bool ShouldReceiveMouseEvents() {
-        return false;
-    }
-
+    public override bool OnEscapePressed() => false;
+    public override bool ShouldReceiveMouseEvents() => false;
     public override void OnMouseDown(MouseEvent args) { }
-
     public override void OnMouseUp(MouseEvent args) { }
-
     public override void OnMouseMove(MouseEvent args) { }
-
     public override void OnMouseWheel(MouseWheelEventArgs args) { }
-
-    public override bool OnMouseEnterSlot(ItemSlot slot) {
-        return false;
-    }
-
-    public override bool OnMouseLeaveSlot(ItemSlot itemSlot) {
-        return false;
-    }
-
-    public override bool CaptureAllInputs() {
-        return false;
-    }
-
-    public override bool TryClose() {
-        return false;
-    }
-
+    public override bool OnMouseEnterSlot(ItemSlot slot) => false;
+    public override bool OnMouseLeaveSlot(ItemSlot itemSlot) => false;
+    public override bool CaptureAllInputs() => false;
+    public override bool TryClose() => false;
     public override void Toggle() { }
-
     public override void UnFocus() { }
-
     public override void Focus() { }
-
     public override bool Focused => false;
-
-    protected override void OnFocusChanged(bool on) {
-        focused = false;
-    }
+    protected override void OnFocusChanged(bool on) => focused = false;
 
     [SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize")]
     public override void Dispose() {
