@@ -19,6 +19,7 @@
         <Reference Include="VintagestoryLib" HintPath="$(VINTAGE_STORY)/VintagestoryLib.dll" Private="false" />
         <Reference Include="Newtonsoft.Json" HintPath="$(VINTAGE_STORY)/Lib/Newtonsoft.Json.dll" Private="false" />
         <Reference Include="protobuf-net" HintPath="$(VINTAGE_STORY)/Lib/protobuf-net.dll" Private="false" />
+        <Reference Include="cairo-sharp" HintPath="$(VINTAGE_STORY)/Lib/cairo-sharp.dll" Private="false" />
     </ItemGroup>
 
     <ItemGroup>
