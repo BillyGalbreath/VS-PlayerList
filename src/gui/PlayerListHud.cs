@@ -31,7 +31,7 @@ public class PlayerListHud : HudElement {
 
     private void UpdateList(IPlayer? notUsed = null) {
         List<IPlayer> players = capi.World.AllOnlinePlayers
-            .OrderBy(player => player.PlayerName)
+            .OrderBy(player => player.PlayerName) // todo - configurable sort order
             .ToList();
 
         Composers["playerlist"] = Compose(players).Compose();
@@ -56,6 +56,8 @@ public class PlayerListHud : HudElement {
             columnWidth = (int)Math.Max(extents.Width + (rowHeight * 2), columnWidth);
         }
 
+        // todo - add configurable header and footer for servers
+        // todo - show cur/max player counts
         GuiComposer composer = capi.Gui
             .CreateCompo("playerlist:thelist", new ElementBounds {
                 Alignment = EnumDialogArea.CenterTop,
