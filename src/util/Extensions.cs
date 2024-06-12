@@ -23,6 +23,6 @@ public static class Extensions {
     }
 
     public static float Ping(this IPlayer player) {
-        return player is ClientPlayer clientPlayer ? clientPlayer.Ping : 0;
+        return player is ClientPlayer clientPlayer ? clientPlayer.Ping : -1;
     }
 }
