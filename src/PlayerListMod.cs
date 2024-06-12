@@ -67,6 +67,8 @@ public class PlayerList : ModSystem {
         FileInfo fileInfo = new(Path.Combine(GamePaths.ModConfig, $"{ModId}.json"));
         GamePaths.EnsurePathExists(fileInfo.Directory!.FullName);
         File.WriteAllText(fileInfo.FullName, json);
+
+        Api.Event.RegisterCallback(_ => _fileWatcher.Queued = false, 100);
     }
 
     public override void Dispose() {
