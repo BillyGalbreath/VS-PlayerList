@@ -20,13 +20,7 @@
         <Reference Include="Newtonsoft.Json" HintPath="$(VINTAGE_STORY)/Lib/Newtonsoft.Json.dll" Private="false" />
         <Reference Include="protobuf-net" HintPath="$(VINTAGE_STORY)/Lib/protobuf-net.dll" Private="false" />
         <Reference Include="cairo-sharp" HintPath="$(VINTAGE_STORY)/Lib/cairo-sharp.dll" Private="false" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="LICENSE" CopyToOutputDirectory="PreserveNewest" />
-        <None Include="resources/**" CopyToOutputDirectory="PreserveNewest">
-            <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-        </None>
+        <None Include="LICENSE;README.md;resources/**" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="" Link="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
     <Target Name="Package" AfterTargets="PostBuildEvent">

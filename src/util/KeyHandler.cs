@@ -18,16 +18,12 @@ public class KeyHandler {
 
         capi.Input.SetHotKeyHandler("chatdialog", vanillaCombo => {
             KeyCombination playerlistCombo = capi.Input.GetHotKeyByCode("playerlist").CurrentMapping;
-            if (vanillaCombo.KeyCode == playerlistCombo.KeyCode &&
-                vanillaCombo.SecondKeyCode == playerlistCombo.SecondKeyCode &&
-                vanillaCombo.Alt == playerlistCombo.Alt &&
-                vanillaCombo.Ctrl == playerlistCombo.Ctrl &&
-                vanillaCombo.Shift == playerlistCombo.Shift
-               ) {
-                return true;
-            }
-
-            return _vanillaKeyHandler(vanillaCombo);
+            return (vanillaCombo.KeyCode == playerlistCombo.KeyCode &&
+                    vanillaCombo.SecondKeyCode == playerlistCombo.SecondKeyCode &&
+                    vanillaCombo.Alt == playerlistCombo.Alt &&
+                    vanillaCombo.Ctrl == playerlistCombo.Ctrl &&
+                    vanillaCombo.Shift == playerlistCombo.Shift) ||
+                   _vanillaKeyHandler(vanillaCombo);
         });
     }
 
