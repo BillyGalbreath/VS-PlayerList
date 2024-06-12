@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using PlayerList.Util;
+using playerlist.util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
-namespace PlayerList.Gui;
+namespace playerlist.gui;
 
 public class PlayerListHud : HudElement {
+    private readonly PlayerList _mod;
     private readonly KeyHandler _keyHandler;
     private readonly int _fontHeight;
     private readonly int _width;
@@ -15,9 +16,10 @@ public class PlayerListHud : HudElement {
     private long _gameTickListenerId;
     private bool _wasOpen;
 
-    public PlayerListHud(KeyHandler keyHandler, ICoreClientAPI api) : base(api) {
-        _keyHandler = keyHandler;
+    public PlayerListHud(PlayerList mod) : base((ICoreClientAPI)mod.Api) {
+        _mod = mod;
 
+        _keyHandler = new KeyHandler(capi);
         _fontHeight = 25;
         _width = 250 - _fontHeight;
 
@@ -30,7 +32,7 @@ public class PlayerListHud : HudElement {
     }
 
     private void UpdateList(IPlayer? notUsed = null) {
-        List<IPlayer> players = capi.World.AllOnlinePlayers.ToArray()
+        List<IPlayer> players = capi.World.AllOnlinePlayers
             .OrderBy(player => player.PlayerName)
             .ToList();
 
@@ -56,8 +58,10 @@ public class PlayerListHud : HudElement {
             composer.AddStaticText(
                 player.PlayerName,
                 player.EntitlementColoredFont(),
-                ElementBounds.Fixed(EnumDialogArea.LeftTop, _fontHeight / 2D, i += _fontHeight, _width, _fontHeight));
-            composer.AddImage(ElementBounds.Fixed(EnumDialogArea.LeftTop, _width, i, _fontHeight, _fontHeight), PingIcon.Get(player.Ping()));
+                ElementBounds.Fixed(EnumDialogArea.LeftTop, _fontHeight / 2D, i += _fontHeight, _width, _fontHeight)
+            );
+            AssetLocation pingIcon = PingIcon.Get(_mod.Config.Thresholds, player.Ping());
+            composer.AddImage(ElementBounds.Fixed(EnumDialogArea.LeftTop, _width, i, _fontHeight, _fontHeight), pingIcon);
         }
 
         return composer.EndChildElements();
@@ -74,8 +78,7 @@ public class PlayerListHud : HudElement {
 
         switch (shouldOpen) {
             case true when !_wasOpen:
-                UpdateList();
-                _gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000, 1000);
+                _gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000);
                 break;
             case false when _wasOpen:
                 capi.Event.UnregisterGameTickListener(_gameTickListenerId);
@@ -142,6 +145,8 @@ public class PlayerListHud : HudElement {
     [SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize")]
     public override void Dispose() {
         base.Dispose();
+
+        _keyHandler.Dispose();
 
         capi.Event.UnregisterGameTickListener(_gameTickListenerId);
 

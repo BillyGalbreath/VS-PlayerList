@@ -1,55 +1,83 @@
-using System.Diagnostics.CodeAnalysis;
-using PlayerList.Configuration;
-using PlayerList.Gui;
-using PlayerList.Network;
-using PlayerList.Util;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using playerlist.configuration;
+using playerlist.gui;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 
-namespace PlayerList;
+namespace playerlist;
 
-[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
-public class PlayerListMod : ModSystem {
-    public static PlayerListMod Instance { get; private set; } = null!;
+public class PlayerList : ModSystem {
+    public ICoreAPI Api { get; private set; } = null!;
+    public Config Config { get; private set; } = null!;
 
-    public ICoreAPI? Api { get; private set; }
+    public ILogger Logger => Mod.Logger;
+    public string ModId => Mod.Info.ModID;
+
+    private FileWatcher FileWatcher => _fileWatcher ??= new FileWatcher(this);
 
     private PlayerListHud? _hud;
-    private KeyHandler? _keyHandler;
-    private NetworkHandler? _networkHandler;
-
-    public PlayerListMod() {
-        Instance = this;
-    }
+    private FileWatcher? _fileWatcher;
+    private IServerNetworkChannel? _channel;
 
     public override void StartPre(ICoreAPI api) {
         Api = api;
-        Config.Reload();
+        ReloadConfig();
     }
 
     public override void StartClientSide(ICoreClientAPI api) {
-        _keyHandler = new KeyHandler(api);
-        _hud = new PlayerListHud(_keyHandler, api);
-        _networkHandler = new ClientNetworkHandler(this, api);
+        _hud = new PlayerListHud(this);
+
+        api.Network.RegisterChannel(Mod.Info.ModID)
+            .RegisterMessageType<Config>()
+            .SetMessageHandler<Config>(packet => {
+                Mod.Logger.Event($"Received ping thresholds of {string.Join(",", packet.Thresholds!)} from server");
+                Config.Thresholds = packet.Thresholds;
+            });
     }
 
     public override void StartServerSide(ICoreServerAPI api) {
-        _networkHandler = new ServerNetworkHandler(this, api);
+        _channel = api.Network.RegisterChannel(Mod.Info.ModID)
+            .RegisterMessageType<Config>()
+            .SetMessageHandler<Config>((_, _) => { });
+
+        api.Event.PlayerJoin += OnPlayerJoin;
+    }
+
+    private void OnPlayerJoin(IServerPlayer player) {
+        _channel?.SendPacket(Config, player);
+    }
+
+    public void ReloadConfig() {
+        Config = Api.LoadModConfig<Config>($"{ModId}.json") ?? new Config();
+
+        FileWatcher.Queued = true;
+
+        string json = JsonConvert.SerializeObject(Config, new JsonSerializerSettings {
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Include,
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
+        });
+
+        FileInfo fileInfo = new(Path.Combine(GamePaths.ModConfig, $"{ModId}.json"));
+        GamePaths.EnsurePathExists(fileInfo.Directory!.FullName);
+        File.WriteAllText(fileInfo.FullName, json);
     }
 
     public override void Dispose() {
         _hud?.Dispose();
         _hud = null;
 
-        _keyHandler?.Dispose();
-        _keyHandler = null;
+        _fileWatcher?.Dispose();
+        _fileWatcher = null;
 
-        _networkHandler?.Dispose();
-        _networkHandler = null;
-
-        Config.Dispose();
-
-        Api = null;
+        if (Api is ICoreServerAPI sapi) {
+            sapi.Event.PlayerJoin -= OnPlayerJoin;
+            _channel = null;
+        }
     }
 }
