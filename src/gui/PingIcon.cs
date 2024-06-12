@@ -9,8 +9,26 @@ public abstract class PingIcon {
     private static readonly AssetLocation _good = new("playerlist", "textures/ping_3.png");
     private static readonly AssetLocation _best = new("playerlist", "textures/ping_4.png");
 
-    public static AssetLocation Get(int[]? limits, float ping) {
-        int ms = (int)(ping * 1000);
-        return limits == null || ms < 0 ? _unknown : ms <= limits[0] ? _best : ms <= limits[1] ? _good : ms <= limits[2] ? _poor : _bad;
+    public static AssetLocation Get(int[]? thresholds, float ping) {
+        int millis = (int)(ping * 1000);
+
+        if (thresholds == null || millis < 0) {
+            return _unknown;
+        }
+
+        if (millis <= thresholds[0]) {
+            return _best;
+        }
+
+        if (millis <= thresholds[1]) {
+            return _good;
+        }
+
+        // ReSharper disable once ConvertIfStatementToReturnStatement
+        if (millis <= thresholds[2]) {
+            return _poor;
+        }
+
+        return _bad;
     }
 }

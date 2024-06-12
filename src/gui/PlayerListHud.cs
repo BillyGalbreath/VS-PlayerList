@@ -31,7 +31,7 @@ public class PlayerListHud : HudElement {
 
     private void UpdateList(IPlayer? notUsed = null) {
         List<IPlayer> players = capi.World.AllOnlinePlayers
-            .OrderBy(player => player.PlayerName) // todo - configurable sort order
+            .OrderBy(player => player.PlayerName) // todo - configurable sort order (maybe?)
             .ToList();
 
         Composers["playerlist"] = Compose(players).Compose();
@@ -80,7 +80,7 @@ public class PlayerListHud : HudElement {
                 fixedWidth = columnWidth - rowHeight
             };
             composer.AddStaticTextAutoFontSize(players[i].PlayerName, players[i].EntitlementColoredFont(), bounds);
-            composer.AddImage(bounds.CopyOffsetedSibling(-rowHeight, 4), PingIcon.Get(_mod.Config.Thresholds, players[i].Ping()));
+            composer.AddImage(bounds.CopyOffsetedSibling(-rowHeight, 4), PingIcon.Get(_mod.Thresholds, players[i].Ping()));
         }
 
         return composer.EndChildElements();

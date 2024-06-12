@@ -12,51 +12,52 @@ namespace playerlist;
 
 public class PlayerList : ModSystem {
     public ICoreAPI Api { get; private set; } = null!;
-    public Config Config { get; private set; } = null!;
 
     public ILogger Logger => Mod.Logger;
     public string ModId => Mod.Info.ModID;
 
-    private FileWatcher FileWatcher => _fileWatcher ??= new FileWatcher(this);
-
-    private PlayerListHud? _hud;
+    private Config? _config;
     private FileWatcher? _fileWatcher;
+    private PlayerListHud? _hud;
     private IServerNetworkChannel? _channel;
+    private int[]? _serverThresholds;
+
+    public int[] Thresholds => _serverThresholds ?? _config?.Thresholds ?? new[] { 65, 125, 500 };
 
     public override void StartPre(ICoreAPI api) {
         Api = api;
         ReloadConfig();
     }
 
-    public override void StartClientSide(ICoreClientAPI api) {
+    public override void StartClientSide(ICoreClientAPI capi) {
         _hud = new PlayerListHud(this);
 
-        api.Network.RegisterChannel(Mod.Info.ModID)
+        capi.Network.RegisterChannel(Mod.Info.ModID)
             .RegisterMessageType<Config>()
             .SetMessageHandler<Config>(packet => {
                 Mod.Logger.Event($"Received ping thresholds of {string.Join(",", packet.Thresholds!)} from server");
-                Config.Thresholds = packet.Thresholds;
+                _serverThresholds = packet.Thresholds;
             });
     }
 
-    public override void StartServerSide(ICoreServerAPI api) {
-        _channel = api.Network.RegisterChannel(Mod.Info.ModID)
+    public override void StartServerSide(ICoreServerAPI sapi) {
+        _channel = sapi.Network.RegisterChannel(Mod.Info.ModID)
             .RegisterMessageType<Config>()
             .SetMessageHandler<Config>((_, _) => { });
 
-        api.Event.PlayerJoin += OnPlayerJoin;
+        sapi.Event.PlayerJoin += OnPlayerJoin;
     }
 
     private void OnPlayerJoin(IServerPlayer player) {
-        _channel?.SendPacket(Config, player);
+        _channel?.SendPacket(_config, player);
     }
 
     public void ReloadConfig() {
-        Config = Api.LoadModConfig<Config>($"{ModId}.json") ?? new Config();
+        _config = Api.LoadModConfig<Config>($"{ModId}.json") ?? new Config();
 
-        FileWatcher.Queued = true;
+        (_fileWatcher ??= new FileWatcher(this)).Queued = true;
 
-        string json = JsonConvert.SerializeObject(Config, new JsonSerializerSettings {
+        string json = JsonConvert.SerializeObject(_config, new JsonSerializerSettings {
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Include,
