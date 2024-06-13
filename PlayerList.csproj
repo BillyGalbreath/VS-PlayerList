@@ -12,6 +12,7 @@
         <DebugSymbols>true</DebugSymbols>
         <ExcludeGeneratedDebugSymbol>false</ExcludeGeneratedDebugSymbol>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <OutputPath>bin\mods\mod</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,6 +25,7 @@
     </ItemGroup>
 
     <Target Name="Package" AfterTargets="PostBuildEvent">
+        <MakeDir Directories="bin\mods\mod" />
         <ZipDirectory DestinationFile="bin/$(TargetName).zip" SourceDirectory="$(TargetDir)" Overwrite="true" />
     </Target>
 
