@@ -53,9 +53,9 @@ public class PlayerList : ModSystem {
     }
 
     public void ReloadConfig() {
-        _config = Api.LoadModConfig<Config>($"{ModId}.json") ?? new Config();
+        GamePaths.EnsurePathExists(GamePaths.ModConfig);
 
-        (_fileWatcher ??= new FileWatcher(this)).Queued = true;
+        _config = Api.LoadModConfig<Config>($"{ModId}.json") ?? new Config();
 
         string json = JsonConvert.SerializeObject(_config, new JsonSerializerSettings {
             Formatting = Formatting.Indented,
@@ -64,9 +64,9 @@ public class PlayerList : ModSystem {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         });
 
-        FileInfo fileInfo = new(Path.Combine(GamePaths.ModConfig, $"{ModId}.json"));
-        GamePaths.EnsurePathExists(fileInfo.Directory!.FullName);
-        File.WriteAllText(fileInfo.FullName, json);
+        (_fileWatcher ??= new FileWatcher(this)).Queued = true;
+
+        File.WriteAllText(Path.Combine(GamePaths.ModConfig, $"{ModId}.json"), json);
 
         Api.Event.RegisterCallback(_ => _fileWatcher.Queued = false, 100);
     }
