@@ -6,20 +6,13 @@ using Vintagestory.Client.NoObf;
 namespace playerlist.util;
 
 public static class Extensions {
-    private static readonly CairoFont _defaultFont = new() {
-        Color = GuiStyle.DialogDefaultTextColor,
-        Fontname = GuiStyle.StandardFontName,
-        UnscaledFontsize = GuiStyle.SmallFontSize,
-        Orientation = EnumTextOrientation.Left
-    };
-
     public static CairoFont EntitlementColoredFont(this IPlayer player) {
         if (player.Entitlements?.Count > 0) {
             if (GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[]? color)) {
-                return _defaultFont.Clone().WithColor(color);
+                return PlayerList.DefaultFont.Clone().WithColor(color);
             }
         }
-        return _defaultFont;
+        return PlayerList.DefaultFont;
     }
 
     public static float Ping(this IPlayer player) {

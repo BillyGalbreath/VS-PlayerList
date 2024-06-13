@@ -11,6 +11,13 @@ using Vintagestory.API.Server;
 namespace playerlist;
 
 public class PlayerList : ModSystem {
+    public static readonly CairoFont DefaultFont = new() {
+        Color = GuiStyle.DialogDefaultTextColor,
+        Fontname = GuiStyle.StandardFontName,
+        UnscaledFontsize = GuiStyle.SmallFontSize,
+        Orientation = EnumTextOrientation.Left
+    };
+
     public ICoreAPI Api { get; private set; } = null!;
 
     public ILogger Logger => Mod.Logger;
@@ -20,9 +27,8 @@ public class PlayerList : ModSystem {
     private FileWatcher? _fileWatcher;
     private PlayerListHud? _hud;
     private IServerNetworkChannel? _channel;
+    private PingIcon? _pingIcon;
     private int[]? _serverThresholds;
-
-    public int[] Thresholds => _serverThresholds ?? _config?.Thresholds ?? new[] { 65, 125, 500 };
 
     public override void StartPre(ICoreAPI api) {
         Api = api;
@@ -31,6 +37,7 @@ public class PlayerList : ModSystem {
 
     public override void StartClientSide(ICoreClientAPI capi) {
         _hud = new PlayerListHud(this);
+        _pingIcon = new PingIcon(capi);
 
         capi.Network.RegisterChannel(Mod.Info.ModID)
             .RegisterMessageType<Config>()
@@ -71,6 +78,10 @@ public class PlayerList : ModSystem {
         Api.Event.RegisterCallback(_ => _fileWatcher.Queued = false, 100);
     }
 
+    public BitmapRef PingIcon(float ping) {
+        return _pingIcon!.Get(_serverThresholds ?? (_config ?? new Config()).Thresholds, ping);
+    }
+
     public override void Dispose() {
         _hud?.Dispose();
         _hud = null;
@@ -80,7 +91,8 @@ public class PlayerList : ModSystem {
 
         if (Api is ICoreServerAPI sapi) {
             sapi.Event.PlayerJoin -= OnPlayerJoin;
-            _channel = null;
         }
+
+        _channel = null;
     }
 }

@@ -16,10 +16,14 @@ public class PlayerListHud : HudElement {
     private long _gameTickListenerId;
     private bool _wasOpen;
 
+    private readonly int _textHeight;
+
     public PlayerListHud(PlayerList mod) : base((ICoreClientAPI)mod.Api) {
         _mod = mod;
 
         _keyHandler = new KeyHandler(capi);
+
+        _textHeight = (int)Math.Ceiling(PlayerList.DefaultFont.GetTextExtents("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789").Height);
 
         capi.Event.PlayerJoin += UpdateList;
         capi.Event.PlayerLeave += UpdateList;
@@ -42,23 +46,19 @@ public class PlayerListHud : HudElement {
     private GuiComposer Compose(List<IPlayer> players) {
         // only show the first 100 players
         int maxCount = Math.Min(players.Count, 100);
-
+        // max 25 players per row
         int columns = (int)Math.Ceiling(maxCount / 25D);
+        // evenly distribute players between columns
         int rows = (int)Math.Ceiling(maxCount / (double)columns);
 
-        int rowHeight = (int)Math.Ceiling(GuiStyle.SmallFontSize + (GuiStyle.SmallFontSize / 2D));
-        int columnWidth = 100;
-        int textHeight = 0;
-
         // calculate max player name width
+        int textWidth = 100; // minimum 100 wide
         for (int i = 0; i < maxCount; i++) {
-            IPlayer player = players[i];
-            TextExtents extents = player.EntitlementColoredFont().GetTextExtents(player.PlayerName);
-            columnWidth = (int)Math.Max(extents.Width + (rowHeight * 2), columnWidth);
-            textHeight = (int)Math.Max(extents.Height, textHeight);
+            TextExtents extents = players[i].EntitlementColoredFont().GetTextExtents(players[i].PlayerName);
+            textWidth = (int)Math.Max(extents.Width + 32, textWidth);
         }
 
-        _mod.Logger.Error($"textHeight: {textHeight} -- rowHeight: {rowHeight}");
+        _mod.Logger.Error($"textHeight: {_textHeight} textWidth: {textWidth}");
 
         // todo - add configurable header and footer for servers
         // todo - show cur/max player counts
@@ -66,25 +66,31 @@ public class PlayerListHud : HudElement {
             .CreateCompo("playerlist:thelist", new ElementBounds {
                 Alignment = EnumDialogArea.CenterTop,
                 BothSizing = ElementSizing.Fixed,
-                fixedWidth = columnWidth * columns,
-                fixedHeight = rowHeight * rows,
+                fixedWidth = (textWidth) * columns,
+                fixedHeight = 25 * rows,
                 fixedOffsetY = 100
             })
             .AddDialogBG(ElementBounds.Fill, false)
             .BeginChildElements();
 
         for (int i = 0; i < maxCount; i++) {
-            ElementBounds bounds = new() {
-                Alignment = EnumDialogArea.LeftTop,
+            ElementBounds textBounds = new() {
+                Alignment = EnumDialogArea.LeftMiddle,
                 BothSizing = ElementSizing.Fixed,
-                // ReSharper disable once PossibleLossOfFraction
-                fixedX = rowHeight + (rowHeight / 2D) + columnWidth * (i / rows),
-                fixedY = rowHeight * (i % rows),
-                fixedHeight = rowHeight,
-                fixedWidth = columnWidth - rowHeight
+                fixedX = 32,
+                fixedY = 2,
+                fixedHeight = 25,
+                fixedWidth = textWidth + 32
             };
-            composer.AddStaticTextAutoFontSize(players[i].PlayerName, players[i].EntitlementColoredFont(), bounds);
-            composer.AddImage(bounds.CopyOffsetedSibling(-rowHeight, (rowHeight - textHeight) / 2D), PingIcon.Get(_mod.Thresholds, players[i].Ping()));
+
+            ElementBounds iconBounds = textBounds
+                .CopyOffsetedSibling(-22, -2)
+                .WithFixedSize(16, 16);
+
+            BitmapRef icon = _mod.PingIcon(players[i].Ping());
+
+            composer.AddStaticTextAutoFontSize(players[i].PlayerName, players[i].EntitlementColoredFont(), textBounds);
+            composer.AddStaticElement(new GuiElementScalableImage(capi, iconBounds, icon));
         }
 
         return composer.EndChildElements();

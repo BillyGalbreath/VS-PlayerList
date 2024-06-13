@@ -1,34 +1,51 @@
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
 namespace playerlist.gui;
 
-public abstract class PingIcon {
-    private static readonly AssetLocation _unknown = new("playerlist", "textures/ping_0.png");
-    private static readonly AssetLocation _bad = new("playerlist", "textures/ping_1.png");
-    private static readonly AssetLocation _poor = new("playerlist", "textures/ping_2.png");
-    private static readonly AssetLocation _good = new("playerlist", "textures/ping_3.png");
-    private static readonly AssetLocation _best = new("playerlist", "textures/ping_4.png");
+public class PingIcon {
+    private readonly BitmapRef _0;
+    private readonly BitmapRef _1;
+    private readonly BitmapRef _2;
+    private readonly BitmapRef _3;
+    private readonly BitmapRef _4;
 
-    public static AssetLocation Get(int[]? thresholds, float ping) {
+    public PingIcon(ICoreClientAPI capi) {
+        _0 = capi.Assets.Get(new AssetLocation("playerlist", "textures/ping_0.png")).ToBitmap(capi);
+        _1 = capi.Assets.Get(new AssetLocation("playerlist", "textures/ping_1.png")).ToBitmap(capi);
+        _2 = capi.Assets.Get(new AssetLocation("playerlist", "textures/ping_2.png")).ToBitmap(capi);
+        _3 = capi.Assets.Get(new AssetLocation("playerlist", "textures/ping_3.png")).ToBitmap(capi);
+        _4 = capi.Assets.Get(new AssetLocation("playerlist", "textures/ping_4.png")).ToBitmap(capi);
+    }
+
+    public BitmapRef Get(int[]? thresholds, float ping) {
         int millis = (int)(ping * 1000);
 
         if (thresholds == null || millis < 0) {
-            return _unknown;
+            return _0;
         }
 
         if (millis <= thresholds[0]) {
-            return _best;
+            return _4;
         }
 
         if (millis <= thresholds[1]) {
-            return _good;
+            return _3;
         }
 
         // ReSharper disable once ConvertIfStatementToReturnStatement
         if (millis <= thresholds[2]) {
-            return _poor;
+            return _2;
         }
 
-        return _bad;
+        return _1;
+    }
+
+    public void Dispose() {
+        _0.Dispose();
+        _1.Dispose();
+        _2.Dispose();
+        _3.Dispose();
+        _4.Dispose();
     }
 }
