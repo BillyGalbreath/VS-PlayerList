@@ -48,13 +48,17 @@ public class PlayerListHud : HudElement {
 
         int rowHeight = (int)Math.Ceiling(GuiStyle.SmallFontSize + (GuiStyle.SmallFontSize / 2D));
         int columnWidth = 100;
+        int textHeight = 0;
 
         // calculate max player name width
         for (int i = 0; i < maxCount; i++) {
             IPlayer player = players[i];
             TextExtents extents = player.EntitlementColoredFont().GetTextExtents(player.PlayerName);
             columnWidth = (int)Math.Max(extents.Width + (rowHeight * 2), columnWidth);
+            textHeight = (int)Math.Max(extents.Height, textHeight);
         }
+
+        _mod.Logger.Error($"textHeight: {textHeight} -- rowHeight: {rowHeight}");
 
         // todo - add configurable header and footer for servers
         // todo - show cur/max player counts
@@ -80,7 +84,7 @@ public class PlayerListHud : HudElement {
                 fixedWidth = columnWidth - rowHeight
             };
             composer.AddStaticTextAutoFontSize(players[i].PlayerName, players[i].EntitlementColoredFont(), bounds);
-            composer.AddImage(bounds.CopyOffsetedSibling(-rowHeight, 4), PingIcon.Get(_mod.Thresholds, players[i].Ping()));
+            composer.AddImage(bounds.CopyOffsetedSibling(-rowHeight, (rowHeight - textHeight) / 2D), PingIcon.Get(_mod.Thresholds, players[i].Ping()));
         }
 
         return composer.EndChildElements();
