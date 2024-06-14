@@ -101,6 +101,7 @@ public class PlayerListHud : HudElement {
 
         switch (shouldOpen) {
             case true when !_wasOpen:
+                UpdateList();
                 _gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000);
                 break;
             case false when _wasOpen:
