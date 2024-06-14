@@ -89,6 +89,9 @@ public class PlayerList : ModSystem {
         _fileWatcher?.Dispose();
         _fileWatcher = null;
 
+        _pingIcon?.Dispose();
+        _pingIcon = null;
+
         if (Api is ICoreServerAPI sapi) {
             sapi.Event.PlayerJoin -= OnPlayerJoin;
         }
