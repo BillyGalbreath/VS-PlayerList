@@ -10,6 +10,7 @@ using Vintagestory.API.Server;
 
 namespace playerlist;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public class PlayerList : ModSystem {
     public static readonly CairoFont DefaultFont = new() {
         Color = GuiStyle.DialogDefaultTextColor,
