@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using playerlist.configuration;
@@ -7,6 +8,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
+using Vintagestory.Server;
 
 namespace playerlist;
 
@@ -24,12 +26,14 @@ public class PlayerList : ModSystem {
     public ILogger Logger => Mod.Logger;
     public string ModId => Mod.Info.ModID;
 
+    public Config Config => _serverConfig ?? _config!;
     private Config? _config;
+    private Config? _serverConfig;
+
     private FileWatcher? _fileWatcher;
     private PlayerListHud? _hud;
     private IServerNetworkChannel? _channel;
     private PingIcon? _pingIcon;
-    private int[]? _serverThresholds;
 
     public override void StartPre(ICoreAPI api) {
         Api = api;
@@ -42,9 +46,9 @@ public class PlayerList : ModSystem {
 
         capi.Network.RegisterChannel(Mod.Info.ModID)
             .RegisterMessageType<Config>()
-            .SetMessageHandler<Config>(packet => {
-                Mod.Logger.Event($"Received ping thresholds of {string.Join(",", packet.Thresholds!)} from server");
-                _serverThresholds = packet.Thresholds;
+            .SetMessageHandler<Config>(serverConfig => {
+                Mod.Logger.Event("Received config from the server");
+                _serverConfig = serverConfig;
             });
     }
 
@@ -57,6 +61,8 @@ public class PlayerList : ModSystem {
     }
 
     private void OnPlayerJoin(IServerPlayer player) {
+        ServerMain server = ((ServerMain)player.Entity.World);
+        _config!.MaxPlayers = server.Config.GetMaxClients(server);
         _channel?.SendPacket(_config, player);
     }
 
@@ -67,7 +73,7 @@ public class PlayerList : ModSystem {
 
         string json = JsonConvert.SerializeObject(_config, new JsonSerializerSettings {
             Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Ignore,
+            NullValueHandling = Api is ICoreServerAPI ? NullValueHandling.Include : NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Include,
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         });
@@ -77,10 +83,16 @@ public class PlayerList : ModSystem {
         File.WriteAllText(Path.Combine(GamePaths.ModConfig, $"{ModId}.json"), json);
 
         Api.Event.RegisterCallback(_ => _fileWatcher.Queued = false, 100);
+
+        if (Api is ICoreServerAPI) {
+            foreach (IServerPlayer player in Api.World.AllOnlinePlayers.Cast<IServerPlayer>()) {
+                OnPlayerJoin(player);
+            }
+        }
     }
 
     public BitmapRef PingIcon(float ping) {
-        return _pingIcon!.Get(_serverThresholds ?? (_config ?? new Config()).Thresholds, ping);
+        return _pingIcon!.Get(Config.Thresholds, ping);
     }
 
     public override void Dispose() {

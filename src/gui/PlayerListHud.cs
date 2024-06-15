@@ -5,7 +5,10 @@ using System.Linq;
 using playerlist.util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
+using Vintagestory.Client.NoObf;
+using Vintagestory.Common;
 
 namespace playerlist.gui;
 
@@ -70,16 +73,26 @@ public class PlayerListHud : HudElement {
             })
             .AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fill, GuiStyle.DialogDefaultBgColor));
 
+        double yOffset = 0;
+        CairoFont centeredFont = PlayerList.DefaultFont.Clone().WithOrientation(EnumTextOrientation.Center);
+        (string? header, string? footer) = ParseHeaderAndFooter();
+
+        if (!string.IsNullOrEmpty(header)) {
+            ElementBounds bounds = ElementBounds.FixedSize(EnumDialogArea.CenterTop, 1024, rowHeight + padding);
+            composer.AddVtmlText(header, centeredFont, bounds);
+            yOffset += bounds.fixedHeight;
+        }
+
         for (int i = 0; i < maxCount; i++) {
             composer.BeginChildElements(new ElementBounds {
-                        Alignment = EnumDialogArea.LeftTop,
+                        Alignment = EnumDialogArea.CenterTop,
                         horizontalSizing = ElementSizing.FitToChildren,
                         verticalSizing = ElementSizing.Fixed,
                         fixedWidth = columnWidth,
                         fixedHeight = rowHeight
                     }
                     // ReSharper disable once PossibleLossOfFraction
-                    .WithFixedPosition((columnWidth + padding) * (i / rows), ((rowHeight + padding) * (i % rows)))
+                    .WithFixedPosition((columnWidth + padding) * (i / rows), ((rowHeight + padding) * (i % rows)) + yOffset)
                     .WithFixedPadding(padding)
                 )
                 .AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fixed(EnumDialogArea.LeftTop, 0, 0, maxBounds.fixedWidth + (iconSize * 2.5D), rowHeight), _white))
@@ -88,7 +101,38 @@ public class PlayerListHud : HudElement {
                 .EndChildElements();
         }
 
+        if (!string.IsNullOrEmpty(footer)) {
+            ElementBounds bounds = ElementBounds.Fixed(EnumDialogArea.CenterTop, 0, ((rowHeight + padding) * rows) + yOffset, 1024, rowHeight + padding);
+            composer.AddVtmlText(footer, centeredFont, bounds);
+            composer.AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fixed(EnumDialogArea.CenterTop, 0, bounds.fixedY + bounds.fixedHeight, 0, 0), _white));
+        }
+
         return composer;
+    }
+
+    private (string?, string?) ParseHeaderAndFooter() {
+        GameCalendar calendar = (GameCalendar)capi.World.Calendar;
+        string? serverName = ((ClientMain)capi.World).GetField<ServerInformation>("ServerInfo")?.GetField<string>("ServerName");
+        string maxPlayers = _mod.Config.MaxPlayers?.ToString() ?? "?";
+        string curPlayers = capi.World.AllOnlinePlayers.Length.ToString();
+        string month = Lang.Get($"month-{calendar.MonthName}");
+        string day = calendar.DayOfMonth.ToString("00");
+        string year = calendar.Year.ToString("0");
+
+        return (
+            Parse(_mod.Config.Header, serverName, maxPlayers, curPlayers, month, day, year),
+            Parse(_mod.Config.Footer, serverName, maxPlayers, curPlayers, month, day, year)
+        );
+    }
+
+    private static string? Parse(string? text, string? serverName, string maxPlayers, string curPlayers, string month, string day, string year) {
+        return text?
+            .Replace("{ServerName}", serverName)
+            .Replace("{MaxPlayers}", maxPlayers)
+            .Replace("{CurPlayers}", curPlayers)
+            .Replace("{Month}", month)
+            .Replace("{Day}", day)
+            .Replace("{Year}", year);
     }
 
     public override bool ShouldReceiveRenderEvents() {
