@@ -13,6 +13,7 @@ using Vintagestory.Common;
 namespace playerlist.gui;
 
 public class PlayerListHud : HudElement {
+    private static readonly double[] _clear = ColorUtil.Hex2Doubles("#000000", 0.0);
     private static readonly double[] _white = ColorUtil.Hex2Doubles("#FFFFFF", 0.1);
 
     private readonly PlayerList _mod;
@@ -55,66 +56,81 @@ public class PlayerListHud : HudElement {
         // calculate max player name width
         ElementBounds maxBounds = ElementBounds.Fixed(EnumDialogArea.LeftTop, 0, 0, 0, 0);
         for (int i = 0; i < maxCount; i++) {
-            players[i].EntitlementColoredFont().AutoBoxSize(players[i].PlayerName, maxBounds, true);
+            IPlayer player = players[i];
+            player.EntitlementColoredFont().AutoBoxSize(player.PlayerName, maxBounds, true);
         }
 
         const double padding = 2;
-        const double iconSize = 16;
         const double rowHeight = 25;
-        double columnWidth = maxBounds.fixedWidth + (iconSize * 2.5D);
+        double columnWidth = maxBounds.fixedWidth + 48;
 
-        // todo - add configurable header and footer for servers
-        // todo - show cur/max player counts
         GuiComposer composer = capi.Gui
             .CreateCompo("playerlist:thelist", new ElementBounds {
                 Alignment = EnumDialogArea.CenterTop,
                 BothSizing = ElementSizing.FitToChildren,
                 fixedOffsetY = 100
             })
-            .AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fill, GuiStyle.DialogDefaultBgColor));
+            .AddGameOverlay(ElementBounds.Fill, GuiStyle.DialogDefaultBgColor);
 
         double yOffset = 0;
-        CairoFont centeredFont = PlayerList.DefaultFont.Clone().WithOrientation(EnumTextOrientation.Center);
-        (string? header, string? footer) = ParseHeaderAndFooter();
+        (string? header, string? footer) = ParseHeaderAndFooter(maxCount);
 
         if (!string.IsNullOrEmpty(header)) {
-            ElementBounds bounds = ElementBounds.FixedSize(EnumDialogArea.CenterTop, 1024, rowHeight + padding);
-            composer.AddVtmlText(header, centeredFont, bounds);
+            ElementBounds bounds = ElementBounds.FixedSize(EnumDialogArea.CenterTop, 1024, rowHeight).WithFixedPadding(padding);
+            composer.AddVtmlText(header, PlayerList.CenteredFont, bounds);
             yOffset += bounds.fixedHeight;
         }
 
+        composer.BeginChildElements(new ElementBounds {
+            Alignment = EnumDialogArea.CenterTop,
+            BothSizing = ElementSizing.FitToChildren
+        }.WithFixedPadding(padding));
+
         for (int i = 0; i < maxCount; i++) {
+            IPlayer player = players[i];
+            float ping = player.Ping();
+
             composer.BeginChildElements(new ElementBounds {
-                        Alignment = EnumDialogArea.CenterTop,
-                        horizontalSizing = ElementSizing.FitToChildren,
-                        verticalSizing = ElementSizing.Fixed,
-                        fixedWidth = columnWidth,
-                        fixedHeight = rowHeight
-                    }
-                    // ReSharper disable once PossibleLossOfFraction
-                    .WithFixedPosition((columnWidth + padding) * (i / rows), ((rowHeight + padding) * (i % rows)) + yOffset)
-                    .WithFixedPadding(padding)
-                )
-                .AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fixed(EnumDialogArea.LeftTop, 0, 0, maxBounds.fixedWidth + (iconSize * 2.5D), rowHeight), _white))
-                .AddStaticElement(new GuiElementScalableImage(capi, ElementBounds.Fixed(EnumDialogArea.LeftMiddle, iconSize / 2, 1, iconSize, iconSize), _mod.PingIcon(players[i].Ping())))
-                .AddStaticText(players[i].PlayerName, players[i].EntitlementColoredFont(), EnumTextOrientation.Left, ElementBounds.Fixed(EnumDialogArea.LeftMiddle, iconSize * 2, -1, maxBounds.fixedWidth, maxBounds.fixedHeight))
-                .EndChildElements();
+                    Alignment = EnumDialogArea.LeftTop,
+                    horizontalSizing = ElementSizing.FitToChildren,
+                    verticalSizing = ElementSizing.Fixed
+                }
+                // ReSharper disable once PossibleLossOfFraction
+                .WithFixedPosition((columnWidth + padding) * (i / rows), ((rowHeight + padding) * (i % rows)) + yOffset + padding)
+                .WithFixedHeight(rowHeight));
+
+            composer.AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fill, _white));
+            composer.AddStaticElement(new GuiElementScalableImage(capi, ElementBounds.Fixed(EnumDialogArea.LeftMiddle, 8, 0, 16, 16), _mod.PingIcon(ping)));
+
+            ElementBounds textBounds = ElementBounds.FixedPos(EnumDialogArea.LeftMiddle, 40 /*+ msBounds.OuterWidth*/, 0);
+            composer.AddStaticTextAutoBoxSize(player.PlayerName, player.EntitlementColoredFont(), EnumTextOrientation.Left, textBounds);
+            textBounds.CalcWorldBounds();
+
+            textBounds = textBounds.FlatCopy().WithFixedSize(textBounds.OuterWidth + 8, textBounds.OuterHeight);
+            composer.AddStaticElement(new GuiElementRectangle(capi, textBounds, _clear));
+            textBounds.CalcWorldBounds();
+
+            composer.EndChildElements();
+
+            composer.AddStaticElement(new GuiElementRectangle(capi, textBounds.FlatCopy().WithFixedSize(textBounds.OuterWidth + padding, textBounds.OuterHeight + padding), _clear));
         }
 
+        composer.EndChildElements();
+
         if (!string.IsNullOrEmpty(footer)) {
-            ElementBounds bounds = ElementBounds.Fixed(EnumDialogArea.CenterTop, 0, ((rowHeight + padding) * rows) + yOffset, 1024, rowHeight + padding);
-            composer.AddVtmlText(footer, centeredFont, bounds);
-            composer.AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fixed(EnumDialogArea.CenterTop, 0, bounds.fixedY + bounds.fixedHeight, 0, 0), _white));
+            ElementBounds bounds = ElementBounds.Fixed(EnumDialogArea.CenterTop, 0, ((rowHeight + padding) * rows) + yOffset, 1024, rowHeight).WithFixedPadding(padding);
+            composer.AddVtmlText(footer, PlayerList.CenteredFont, bounds);
+            composer.AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fixed(EnumDialogArea.CenterTop, 0, bounds.fixedY + bounds.fixedHeight, 0, 0), _clear));
         }
 
         return composer;
     }
 
-    private (string?, string?) ParseHeaderAndFooter() {
+    private (string?, string?) ParseHeaderAndFooter(int maxCount) {
         GameCalendar calendar = (GameCalendar)capi.World.Calendar;
         string? serverName = ((ClientMain)capi.World).GetField<ServerInformation>("ServerInfo")?.GetField<string>("ServerName");
         string maxPlayers = _mod.Config.MaxPlayers?.ToString() ?? "?";
-        string curPlayers = capi.World.AllOnlinePlayers.Length.ToString();
+        string curPlayers = maxCount.ToString();
         string month = Lang.Get($"month-{calendar.MonthName}");
         string day = calendar.DayOfMonth.ToString("00");
         string year = calendar.Year.ToString("0");

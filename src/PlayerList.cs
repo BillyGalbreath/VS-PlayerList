@@ -21,6 +21,8 @@ public class PlayerList : ModSystem {
         Orientation = EnumTextOrientation.Left
     };
 
+    public static readonly CairoFont CenteredFont = DefaultFont.Clone().WithOrientation(EnumTextOrientation.Center);
+
     public ICoreAPI Api { get; private set; } = null!;
 
     public ILogger Logger => Mod.Logger;
