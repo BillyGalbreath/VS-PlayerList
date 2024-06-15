@@ -8,7 +8,7 @@
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <DebugType>embedded</DebugType>
+        <DebugType>full</DebugType>
         <DebugSymbols>true</DebugSymbols>
         <ExcludeGeneratedDebugSymbol>false</ExcludeGeneratedDebugSymbol>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
