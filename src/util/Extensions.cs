@@ -28,9 +28,11 @@ public static class Extensions {
     }
 
     public static void AddVtmlText(this GuiComposer composer, string text, CairoFont font, ElementBounds bounds) {
+        bounds.fixedX += bounds.fixedPaddingX * 2;
+        bounds.fixedY += bounds.fixedPaddingY * 2;
         GuiElementVtmlText element = new(composer.Api, text, font, bounds);
         composer.AddInteractiveElement(element);
-        bounds.fixedWidth = element.MaxLineWidth;
-        bounds.fixedHeight = element.TotalHeight;
+        bounds.fixedWidth = element.MaxLineWidth + (bounds.fixedPaddingX * 2);
+        bounds.fixedHeight = element.TotalHeight + (bounds.fixedPaddingY * 2);
     }
 }
