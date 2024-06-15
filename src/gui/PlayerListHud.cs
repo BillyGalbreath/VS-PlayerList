@@ -62,7 +62,7 @@ public class PlayerListHud : HudElement {
 
         const double padding = 2;
         const double rowHeight = 25;
-        double columnWidth = maxBounds.fixedWidth + 48;
+        double columnWidth = maxBounds.fixedWidth + 40;
 
         GuiComposer composer = capi.Gui
             .CreateCompo("playerlist:thelist", new ElementBounds {
@@ -99,10 +99,10 @@ public class PlayerListHud : HudElement {
                 .WithFixedPosition((columnWidth + padding) * (i / rows), ((rowHeight + padding) * (i % rows)) + yOffset + padding)
                 .WithFixedHeight(rowHeight));
 
-            composer.AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fill, _white));
+            composer.AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fixed(EnumDialogArea.LeftTop, 0, 0, maxBounds.fixedWidth + 40, rowHeight), _white));
             composer.AddStaticElement(new GuiElementScalableImage(capi, ElementBounds.Fixed(EnumDialogArea.LeftMiddle, 8, 0, 16, 16), _mod.PingIcon(ping)));
 
-            ElementBounds textBounds = ElementBounds.FixedPos(EnumDialogArea.LeftMiddle, 40 /*+ msBounds.OuterWidth*/, 0);
+            ElementBounds textBounds = ElementBounds.FixedPos(EnumDialogArea.LeftMiddle, 32, 0);
             composer.AddStaticTextAutoBoxSize(player.PlayerName, player.EntitlementColoredFont(), EnumTextOrientation.Left, textBounds);
             textBounds.CalcWorldBounds();
 

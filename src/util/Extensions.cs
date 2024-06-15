@@ -28,8 +28,8 @@ public static class Extensions {
     }
 
     public static void AddVtmlText(this GuiComposer composer, string text, CairoFont font, ElementBounds bounds) {
-        bounds.fixedX += bounds.fixedPaddingX * 2;
-        bounds.fixedY += bounds.fixedPaddingY * 2;
+        bounds.fixedX += bounds.fixedPaddingX;
+        bounds.fixedY += bounds.fixedPaddingY;
         GuiElementVtmlText element = new(composer.Api, text, font, bounds);
         composer.AddInteractiveElement(element);
         bounds.fixedWidth = element.MaxLineWidth + (bounds.fixedPaddingX * 2);
