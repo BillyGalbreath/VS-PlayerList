@@ -1,21 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using playerlist.util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Config;
-using Vintagestory.API.MathTools;
-using Vintagestory.Client.NoObf;
-using Vintagestory.Common;
 
 namespace playerlist.gui;
 
 public class PlayerListHud : HudElement {
-    private static readonly double[] _clear = ColorUtil.Hex2Doubles("#000000", 0.0);
-    private static readonly double[] _white = ColorUtil.Hex2Doubles("#FFFFFF", 0.1);
-
     private readonly PlayerList _mod;
     private readonly KeyHandler _keyHandler;
 
@@ -46,109 +38,45 @@ public class PlayerListHud : HudElement {
     }
 
     private GuiComposer Compose(List<IPlayer> players) {
-        // only show the first 100 players
-        int maxCount = Math.Min(players.Count, 100);
-        // max 20 players per row
-        int columns = (int)Math.Ceiling(maxCount / 20D);
-        // evenly distribute players between columns
-        int rows = (int)Math.Ceiling(maxCount / (double)columns);
+        (string? header, string? footer) = Util.ParseHeaderAndFooter(_mod, players.Count);
 
-        // calculate max player name width
-        ElementBounds maxBounds = ElementBounds.Fixed(EnumDialogArea.LeftTop, 0, 0, 0, 0);
-        for (int i = 0; i < maxCount; i++) {
-            IPlayer player = players[i];
-            player.EntitlementColoredFont().AutoBoxSize(player.PlayerName, maxBounds, true);
-        }
-
-        const double padding = 2;
-        const double rowHeight = 25;
-        double columnWidth = maxBounds.fixedWidth + 40;
-
-        GuiComposer composer = capi.Gui
-            .CreateCompo("playerlist:thelist", new ElementBounds {
-                Alignment = EnumDialogArea.CenterTop,
-                BothSizing = ElementSizing.FitToChildren,
-                fixedOffsetY = 100
-            })
-            .AddGameOverlay(ElementBounds.Fill, GuiStyle.DialogDefaultBgColor);
-
-        double yOffset = 0;
-        (string? header, string? footer) = ParseHeaderAndFooter(maxCount);
-
-        if (!string.IsNullOrEmpty(header)) {
-            ElementBounds bounds = ElementBounds.FixedSize(EnumDialogArea.CenterTop, 1024, rowHeight).WithFixedPadding(padding);
-            composer.AddVtmlText(header, PlayerList.CenteredFont, bounds);
-            yOffset += bounds.fixedHeight;
-        }
-
-        composer.BeginChildElements(new ElementBounds {
+        ElementBounds dialog = new() {
             Alignment = EnumDialogArea.CenterTop,
-            BothSizing = ElementSizing.FitToChildren
-        }.WithFixedPadding(padding));
+            BothSizing = ElementSizing.FitToChildren,
+            fixedOffsetY = 100
+        };
+        ElementBounds bgBounds = new() {
+            Alignment = EnumDialogArea.CenterTop,
+            BothSizing = ElementSizing.FitToChildren,
+            percentWidth = 1.0,
+            percentHeight = 1.0,
+            fixedPaddingX = GuiPlayerGrid.Padding,
+            fixedPaddingY = GuiPlayerGrid.Padding
+        };
+        ElementBounds gridBounds = new() {
+            Alignment = EnumDialogArea.CenterTop,
+            BothSizing = ElementSizing.Fixed
+        };
+        ElementBounds headerBounds = new() {
+            Alignment = EnumDialogArea.CenterTop,
+            BothSizing = ElementSizing.Fixed,
+            fixedX = GuiPlayerGrid.Padding,
+            fixedWidth = 2048,
+            fixedPaddingX = GuiPlayerGrid.Padding,
+            fixedPaddingY = GuiPlayerGrid.Padding
+        };
 
-        for (int i = 0; i < maxCount; i++) {
-            IPlayer player = players[i];
-            float ping = player.Ping();
-
-            composer.BeginChildElements(new ElementBounds {
-                    Alignment = EnumDialogArea.LeftTop,
-                    horizontalSizing = ElementSizing.FitToChildren,
-                    verticalSizing = ElementSizing.Fixed
-                }
-                // ReSharper disable once PossibleLossOfFraction
-                .WithFixedPosition((columnWidth + padding) * (i / rows), ((rowHeight + padding) * (i % rows)) + yOffset + padding)
-                .WithFixedHeight(rowHeight));
-
-            composer.AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fixed(EnumDialogArea.LeftTop, 0, 0, maxBounds.fixedWidth + 40, rowHeight), _white));
-            composer.AddStaticElement(new GuiElementScalableImage(capi, ElementBounds.Fixed(EnumDialogArea.LeftMiddle, 8, 0, 16, 16), _mod.PingIcon(ping)));
-
-            ElementBounds textBounds = ElementBounds.FixedPos(EnumDialogArea.LeftMiddle, 32, 0);
-            composer.AddStaticTextAutoBoxSize(player.PlayerName, player.EntitlementColoredFont(), EnumTextOrientation.Left, textBounds);
-            textBounds.CalcWorldBounds();
-
-            textBounds = textBounds.FlatCopy().WithFixedSize(textBounds.OuterWidth + 8, textBounds.OuterHeight);
-            composer.AddStaticElement(new GuiElementRectangle(capi, textBounds, _clear));
-            textBounds.CalcWorldBounds();
-
-            composer.EndChildElements();
-
-            composer.AddStaticElement(new GuiElementRectangle(capi, textBounds.FlatCopy().WithFixedSize(textBounds.OuterWidth + padding, textBounds.OuterHeight + padding), _clear));
-        }
-
-        composer.EndChildElements();
-
-        if (!string.IsNullOrEmpty(footer)) {
-            ElementBounds bounds = ElementBounds.Fixed(EnumDialogArea.CenterTop, 0, ((rowHeight + padding) * rows) + yOffset, 1024, rowHeight).WithFixedPadding(padding);
-            composer.AddVtmlText(footer, PlayerList.CenteredFont, bounds);
-            composer.AddStaticElement(new GuiElementRectangle(capi, ElementBounds.Fixed(EnumDialogArea.CenterTop, 0, bounds.fixedY + bounds.fixedHeight, 0, 0), _clear));
-        }
-
-        return composer;
-    }
-
-    private (string?, string?) ParseHeaderAndFooter(int maxCount) {
-        GameCalendar calendar = (GameCalendar)capi.World.Calendar;
-        string? serverName = ((ClientMain)capi.World).GetField<ServerInformation>("ServerInfo")?.GetField<string>("ServerName");
-        string maxPlayers = _mod.Config.MaxPlayers?.ToString() ?? "?";
-        string curPlayers = maxCount.ToString();
-        string month = Lang.Get($"month-{calendar.MonthName}");
-        string day = calendar.DayOfMonth.ToString("00");
-        string year = calendar.Year.ToString("0");
-
-        return (
-            Parse(_mod.Config.Header, serverName, maxPlayers, curPlayers, month, day, year),
-            Parse(_mod.Config.Footer, serverName, maxPlayers, curPlayers, month, day, year)
-        );
-    }
-
-    private static string? Parse(string? text, string? serverName, string maxPlayers, string curPlayers, string month, string day, string year) {
-        return text?
-            .Replace("{ServerName}", serverName)
-            .Replace("{MaxPlayers}", maxPlayers)
-            .Replace("{CurPlayers}", curPlayers)
-            .Replace("{Month}", month)
-            .Replace("{Day}", day)
-            .Replace("{Year}", year);
+        return capi.Gui
+            .CreateCompo("playerlist", dialog)
+            .AddGameOverlay(bgBounds, GuiStyle.DialogDefaultBgColor)
+            .BeginChildElements(bgBounds)
+            .AddVtmlText(capi, header, Util.CenteredFont, headerBounds)
+            .AddStaticElement(new GuiPlayerGrid(_mod, players, gridBounds
+                .WithFixedOffset(0, headerBounds.fixedHeight)))
+            .AddVtmlText(capi, footer, Util.CenteredFont, headerBounds.FlatCopy()
+                .WithFixedPosition(GuiPlayerGrid.Padding, headerBounds.fixedHeight + gridBounds.fixedHeight + (GuiPlayerGrid.Padding * 2))
+                .WithFixedSize(2048, 0))
+            .EndChildElements();
     }
 
     public override bool ShouldReceiveRenderEvents() {

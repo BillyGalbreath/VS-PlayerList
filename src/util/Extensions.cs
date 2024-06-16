@@ -17,22 +17,20 @@ public static class Extensions {
     public static CairoFont EntitlementColoredFont(this IPlayer player) {
         if (player.Entitlements?.Count > 0) {
             if (GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[]? color)) {
-                return PlayerList.DefaultFont.Clone().WithColor(color);
+                return Util.DefaultFont.Clone().WithColor(color);
             }
         }
-        return PlayerList.DefaultFont;
+        return Util.DefaultFont;
     }
 
     public static float Ping(this IPlayer player) {
         return player is ClientPlayer clientPlayer ? clientPlayer.Ping : -1;
     }
 
-    public static void AddVtmlText(this GuiComposer composer, string text, CairoFont font, ElementBounds bounds) {
-        bounds.fixedX += bounds.fixedPaddingX;
-        bounds.fixedY += bounds.fixedPaddingY;
-        GuiElementVtmlText element = new(composer.Api, text, font, bounds);
-        composer.AddInteractiveElement(element);
-        bounds.fixedWidth = element.MaxLineWidth + (bounds.fixedPaddingX * 2);
-        bounds.fixedHeight = element.TotalHeight + (bounds.fixedPaddingY * 2);
+    public static GuiComposer AddVtmlText(this GuiComposer composer, ICoreClientAPI capi, string? text, CairoFont font, ElementBounds bounds) {
+        if (!string.IsNullOrEmpty(text)) {
+            composer.AddInteractiveElement(new GuiElementVtmlText(capi, text, font, bounds));
+        }
+        return composer;
     }
 }

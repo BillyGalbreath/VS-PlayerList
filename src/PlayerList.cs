@@ -14,15 +14,6 @@ namespace playerlist;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class PlayerList : ModSystem {
-    public static readonly CairoFont DefaultFont = new() {
-        Color = GuiStyle.DialogDefaultTextColor,
-        Fontname = GuiStyle.StandardFontName,
-        UnscaledFontsize = GuiStyle.SmallFontSize,
-        Orientation = EnumTextOrientation.Left
-    };
-
-    public static readonly CairoFont CenteredFont = DefaultFont.Clone().WithOrientation(EnumTextOrientation.Center);
-
     public ICoreAPI Api { get; private set; } = null!;
 
     public ILogger Logger => Mod.Logger;
