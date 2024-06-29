@@ -32,7 +32,7 @@ public class PlayerListHud : HudElement {
             .OrderBy(player => player.PlayerName) // todo - configurable sort order (maybe?)
             .ToList();
 
-        Composers["playerlist"] = Compose(players).Compose();
+        SingleComposer = Compose(players).Compose();
 
         TryOpen();
     }
