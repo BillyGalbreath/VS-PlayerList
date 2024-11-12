@@ -38,7 +38,7 @@ public class GuiPlayerGrid : GuiElement {
         };
 
         foreach (IPlayer player in players) {
-            player.EntitlementColoredFont().AutoBoxSize(player.PlayerName ?? "", maxBounds, false);
+            player.EntitlementColoredFont().AutoBoxSize(player.PlayerName ?? "", maxBounds, true);
         }
 
         _cellWidth = Math.Ceiling(maxBounds.fixedWidth) + 38;
