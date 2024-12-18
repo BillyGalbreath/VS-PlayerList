@@ -16,12 +16,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="VintagestoryAPI" HintPath="$(VINTAGE_STORY)/VintagestoryAPI.dll" Private="false" />
-        <Reference Include="VintagestoryLib" HintPath="$(VINTAGE_STORY)/VintagestoryLib.dll" Private="false" />
-        <Reference Include="Newtonsoft.Json" HintPath="$(VINTAGE_STORY)/Lib/Newtonsoft.Json.dll" Private="false" />
-        <Reference Include="protobuf-net" HintPath="$(VINTAGE_STORY)/Lib/protobuf-net.dll" Private="false" />
-        <Reference Include="cairo-sharp" HintPath="$(VINTAGE_STORY)/Lib/cairo-sharp.dll" Private="false" />
-        <Reference Include="SkiaSharp" HintPath="$(VINTAGE_STORY)/Lib/SkiaSharp.dll" Private="false" />
+        <Reference Include="$(VINTAGE_STORY)/**/*.dll" Private="false" />
         <None Include="LICENSE;README.md;resources/**" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="" Link="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
