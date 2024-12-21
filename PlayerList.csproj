@@ -16,7 +16,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="$(VINTAGE_STORY)/**/*.dll" Private="false" />
+        <Reference Include="$(VINTAGE_STORY)/**/*.dll" Exclude="$(VINTAGE_STORY)/**/CairoSharp.dll" Private="false" />
         <None Include="LICENSE;README.md;resources/**" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="" Link="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
