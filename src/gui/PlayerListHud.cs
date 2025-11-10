@@ -24,9 +24,6 @@ public sealed class PlayerListHud : HudElement {
             .Select(player => player.PlayerUID)
             .ToList();
 
-        // for testing
-        for (int i = 0; i < 20; i++) players.Add(players[0]);
-
         if (_players.SequenceEqual(players)) {
             // nothing changed
             return;
