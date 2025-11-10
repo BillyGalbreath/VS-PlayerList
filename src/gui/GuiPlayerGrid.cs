@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Cairo;
-using playerlist.util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
@@ -11,7 +8,7 @@ public class GuiPlayerGrid : GuiElement {
     public const double Padding = 2;
 
     private readonly PlayerList _mod;
-    private readonly List<IPlayer> _players;
+    private readonly List<PlayerData> _players;
     private readonly TextDrawUtil _textUtil;
 
     private readonly int _cols;
@@ -19,7 +16,7 @@ public class GuiPlayerGrid : GuiElement {
     private readonly double _cellWidth;
     private readonly double _cellHeight;
 
-    public GuiPlayerGrid(PlayerList mod, List<IPlayer> players, ElementBounds bounds) : base(mod.Api as ICoreClientAPI, bounds) {
+    public GuiPlayerGrid(PlayerList mod, List<PlayerData> players, ElementBounds bounds) : base(mod.Api as ICoreClientAPI, bounds) {
         _mod = mod;
         _players = players;
         _textUtil = new TextDrawUtil();
@@ -37,8 +34,8 @@ public class GuiPlayerGrid : GuiElement {
             BothSizing = ElementSizing.Fixed
         };
 
-        foreach (IPlayer player in players) {
-            player.EntitlementColoredFont().AutoBoxSize(player.PlayerName ?? "", maxBounds, true);
+        foreach (PlayerData player in players) {
+            player.Font.AutoBoxSize(player.Name, maxBounds, true);
         }
 
         _cellWidth = Math.Ceiling(maxBounds.fixedWidth) + 38;
@@ -67,12 +64,12 @@ public class GuiPlayerGrid : GuiElement {
                     continue;
                 }
 
-                IPlayer player = _players[i++];
-                surface.Image(_mod.PingIcon(player.Ping()), (int)(x + scaled(8)), (int)(y + scaled(4)), (int)scaled(16), (int)scaled(16));
+                PlayerData player = _players[i++];
+                surface.Image(_mod.PingIcon(player.Ping), (int)(x + scaled(8)), (int)(y + scaled(4)), (int)scaled(16), (int)scaled(16));
 
-                CairoFont font = player.EntitlementColoredFont();
+                CairoFont font = player.Font;
                 font.SetupContext(ctx);
-                _textUtil.DrawTextLine(ctx, font, player.PlayerName, x + scaled(30), y);
+                _textUtil.DrawTextLine(ctx, font, player.Name, x + scaled(30), y);
             }
         }
     }

@@ -1,5 +1,4 @@
-using System.IO;
-using System.Linq;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using playerlist.configuration;
@@ -12,7 +11,7 @@ using Vintagestory.Server;
 
 namespace playerlist;
 
-// ReSharper disable once ClassNeverInstantiated.Global
+[UsedImplicitly]
 public class PlayerList : ModSystem {
     public ICoreAPI Api { get; private set; } = null!;
 
@@ -48,7 +47,8 @@ public class PlayerList : ModSystem {
     public override void StartServerSide(ICoreServerAPI sapi) {
         _channel = sapi.Network.RegisterChannel(Mod.Info.ModID)
             .RegisterMessageType<Config>()
-            .SetMessageHandler<Config>((_, _) => { });
+            .SetMessageHandler<Config>((_, _) => {
+            });
 
         sapi.Event.PlayerJoin += OnPlayerJoin;
     }
@@ -84,7 +84,7 @@ public class PlayerList : ModSystem {
         }
     }
 
-    public BitmapRef PingIcon(float ping) {
+    public BitmapRef PingIcon(int ping) {
         return _pingIcon!.Get(Config.Thresholds, ping);
     }
 

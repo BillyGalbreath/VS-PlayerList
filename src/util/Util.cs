@@ -1,27 +1,21 @@
 using Vintagestory.API.Client;
+using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.Client.NoObf;
-using Vintagestory.Common;
 
 namespace playerlist.util;
 
 public abstract class Util {
-    public static readonly CairoFont DefaultFont = new() {
-        Color = GuiStyle.DialogDefaultTextColor,
-        Fontname = GuiStyle.StandardFontName,
-        UnscaledFontsize = GuiStyle.SmallFontSize,
-        Orientation = EnumTextOrientation.Left
-    };
-
-    public static readonly CairoFont CenteredFont = DefaultFont.Clone().WithOrientation(EnumTextOrientation.Center);
+    public static readonly CairoFont DefaultFont = CairoFont.WhiteSmallText().WithOrientation(EnumTextOrientation.Left);
+    public static readonly CairoFont CenteredFont = CairoFont.WhiteSmallText().WithOrientation(EnumTextOrientation.Center);
 
     public static (string?, string?) ParseHeaderAndFooter(PlayerList mod, int maxCount) {
-        GameCalendar calendar = (GameCalendar)mod.Api.World.Calendar;
+        IGameCalendar calendar = mod.Api.World.Calendar;
         string? serverName = ((ClientMain)mod.Api.World).GetField<ServerInformation>("ServerInfo")?.GetField<string>("ServerName");
         string maxPlayers = mod.Config.MaxPlayers?.ToString() ?? "?";
         string curPlayers = maxCount.ToString();
         string month = Lang.Get($"month-{calendar.MonthName}");
-        string day = calendar.DayOfMonth.ToString("00");
+        string day = ((int)(calendar.TotalDays % calendar.DaysPerMonth) + 1).ToString("00");
         string year = calendar.Year.ToString("0");
 
         return (

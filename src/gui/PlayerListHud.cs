@@ -1,43 +1,44 @@
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using playerlist.util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
 namespace playerlist.gui;
 
-public class PlayerListHud : HudElement {
+public sealed class PlayerListHud : HudElement {
     private readonly PlayerList _mod;
     private readonly KeyHandler _keyHandler;
+    private readonly long _gameTickListenerId;
 
-    private long _gameTickListenerId;
-    private bool _wasOpen;
+    private List<PlayerData> _players = [];
 
     public PlayerListHud(PlayerList mod) : base((ICoreClientAPI)mod.Api) {
         _mod = mod;
 
         _keyHandler = new KeyHandler(capi);
 
-        capi.Event.PlayerJoin += UpdateList;
-        capi.Event.PlayerLeave += UpdateList;
+        _gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000);
     }
 
-    public override void OnOwnPlayerDataReceived() {
-        UpdateList();
-    }
+    private void UpdateList() {
+        List<PlayerData> players = [
+            ..
+            capi.World.AllOnlinePlayers
+                // todo - configurable sort order (maybe?)
+                .OrderBy(player => player.PlayerName)
+                .Select(player => new PlayerData(player))
+        ];
 
-    private void UpdateList(IPlayer? notUsed = null) {
-        List<IPlayer> players = capi.World.AllOnlinePlayers
-            .OrderBy(player => player.PlayerName) // todo - configurable sort order (maybe?)
-            .ToList();
+        if (_players.SequenceEqual(players)) {
+            // nothing changed
+            return;
+        }
 
-        SingleComposer = Compose(players).Compose();
+        SingleComposer = Compose(_players = players).Compose();
 
         TryOpen();
     }
 
-    private GuiComposer Compose(List<IPlayer> players) {
+    private GuiComposer Compose(List<PlayerData> players) {
         (string? header, string? footer) = Util.ParseHeaderAndFooter(_mod, players.Count);
 
         ElementBounds dialog = new() {
@@ -74,25 +75,13 @@ public class PlayerListHud : HudElement {
             .AddStaticElement(new GuiPlayerGrid(_mod, players, gridBounds
                 .WithFixedOffset(0, headerBounds.fixedHeight)))
             .AddVtmlText(capi, footer, Util.CenteredFont, headerBounds.FlatCopy()
-                .WithFixedPosition(GuiPlayerGrid.Padding, headerBounds.fixedHeight + gridBounds.fixedHeight + (GuiPlayerGrid.Padding * 2))
+                .WithFixedPosition(GuiPlayerGrid.Padding, headerBounds.fixedHeight + gridBounds.fixedHeight + GuiPlayerGrid.Padding * 2)
                 .WithFixedSize(2048, 0))
             .EndChildElements();
     }
 
     public override bool ShouldReceiveRenderEvents() {
-        bool shouldOpen = _keyHandler.IsKeyComboActive();
-
-        switch (shouldOpen) {
-            case true when !_wasOpen:
-                UpdateList();
-                _gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000);
-                break;
-            case false when _wasOpen:
-                capi.Event.UnregisterGameTickListener(_gameTickListenerId);
-                break;
-        }
-
-        return _wasOpen = shouldOpen;
+        return _keyHandler.IsKeyComboActive();
     }
 
     public override double InputOrder => 1.0999;
@@ -118,15 +107,11 @@ public class PlayerListHud : HudElement {
     public override bool Focused => false;
     protected override void OnFocusChanged(bool on) => focused = false;
 
-    [SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize")]
     public override void Dispose() {
         base.Dispose();
 
         _keyHandler.Dispose();
 
         capi.Event.UnregisterGameTickListener(_gameTickListenerId);
-
-        capi.Event.PlayerJoin -= UpdateList;
-        capi.Event.PlayerLeave -= UpdateList;
     }
 }

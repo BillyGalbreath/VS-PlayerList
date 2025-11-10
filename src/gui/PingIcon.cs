@@ -18,23 +18,21 @@ public class PingIcon {
         _4 = capi.Assets.Get(new AssetLocation("playerlist", "textures/ping_4.png")).ToBitmap(capi);
     }
 
-    public BitmapRef Get(int[]? thresholds, float ping) {
-        int millis = (int)(ping * 1000);
-
-        if (thresholds == null || millis < 0) {
+    public BitmapRef Get(int[]? thresholds, int ping) {
+        if (thresholds == null || ping < 0) {
             return _0;
         }
 
-        if (millis <= thresholds[0]) {
+        if (ping <= thresholds[0]) {
             return _4;
         }
 
-        if (millis <= thresholds[1]) {
+        if (ping <= thresholds[1]) {
             return _3;
         }
 
         // ReSharper disable once ConvertIfStatementToReturnStatement
-        if (millis <= thresholds[2]) {
+        if (ping <= thresholds[2]) {
             return _2;
         }
 
