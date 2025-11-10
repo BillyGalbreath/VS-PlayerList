@@ -5,7 +5,7 @@ namespace playerlist.configuration;
 
 [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
 public class Config {
-    public int[]? Thresholds { get; set; } = { 65, 125, 500 };
+    public int[]? Thresholds { get; set; } = [100, 250, 500];
 
     public string? Header { get; set; }
 
