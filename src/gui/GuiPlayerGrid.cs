@@ -16,9 +16,9 @@ public class GuiPlayerGrid : GuiElement {
     private readonly double _cellWidth;
     private readonly double _cellHeight;
 
-    public GuiPlayerGrid(PlayerList mod, List<PlayerData> players, ElementBounds bounds) : base(mod.Api as ICoreClientAPI, bounds) {
+    public GuiPlayerGrid(PlayerList mod, List<string> players, ElementBounds bounds) : base(mod.Api as ICoreClientAPI, bounds) {
         _mod = mod;
-        _players = players;
+        _players = players.Select(uid => new PlayerData(api.World.PlayerByUid(uid))).ToList();
         _textUtil = new TextDrawUtil();
 
         // only show the first 100 players
@@ -34,15 +34,15 @@ public class GuiPlayerGrid : GuiElement {
             BothSizing = ElementSizing.Fixed
         };
 
-        foreach (PlayerData player in players) {
+        foreach (PlayerData player in _players) {
             player.Font.AutoBoxSize(player.Name, maxBounds, true);
         }
 
         _cellWidth = Math.Ceiling(maxBounds.fixedWidth) + 38;
         _cellHeight = Math.Max(25, Math.Ceiling(maxBounds.fixedHeight));
 
-        Bounds.fixedWidth = (_cols * (Padding + _cellWidth)) - Padding;
-        Bounds.fixedHeight = (_rows * (Padding + _cellHeight)) - Padding;
+        Bounds.fixedWidth = _cols * (Padding + _cellWidth) - Padding;
+        Bounds.fixedHeight = _rows * (Padding + _cellHeight) - Padding;
     }
 
     public override void ComposeElements(Context ctx, ImageSurface surface) {
@@ -53,16 +53,16 @@ public class GuiPlayerGrid : GuiElement {
         int i = 0;
         for (int row = 0; row < _rows; ++row) {
             for (int col = 0; col < _cols; ++col) {
-                double x = Bounds.drawX + (col * (width + padding));
-                double y = Bounds.drawY + (row * (height + padding)) + padding;
+                if (i >= _players.Count) {
+                    goto done;
+                }
+
+                double x = Bounds.drawX + col * (width + padding);
+                double y = Bounds.drawY + row * (height + padding);
 
                 ctx.SetSourceRGBA(1.0, 1.0, 1.0, 0.2);
                 Rectangle(ctx, x, y, width, height);
                 ctx.Fill();
-
-                if (i >= _players.Count) {
-                    continue;
-                }
 
                 PlayerData player = _players[i++];
                 surface.Image(_mod.PingIcon(player.Ping), (int)(x + scaled(8)), (int)(y + scaled(4)), (int)scaled(16), (int)scaled(16));
@@ -72,5 +72,7 @@ public class GuiPlayerGrid : GuiElement {
                 _textUtil.DrawTextLine(ctx, font, player.Name, x + scaled(30), y);
             }
         }
+
+        done: ;
     }
 }

@@ -9,24 +9,23 @@ public sealed class PlayerListHud : HudElement {
     private readonly KeyHandler _keyHandler;
     private readonly long _gameTickListenerId;
 
-    private List<PlayerData> _players = [];
+    private List<string> _players = [];
 
     public PlayerListHud(PlayerList mod) : base((ICoreClientAPI)mod.Api) {
         _mod = mod;
-
         _keyHandler = new KeyHandler(capi);
-
         _gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000);
     }
 
     private void UpdateList() {
-        List<PlayerData> players = [
-            ..
-            capi.World.AllOnlinePlayers
-                // todo - configurable sort order (maybe?)
-                .OrderBy(player => player.PlayerName)
-                .Select(player => new PlayerData(player))
-        ];
+        // quickly get players
+        List<string> players = capi.World.AllOnlinePlayers
+            .OrderBy(player => player.PlayerName)
+            .Select(player => player.PlayerUID)
+            .ToList();
+
+        // for testing
+        for (int i = 0; i < 20; i++) players.Add(players[0]);
 
         if (_players.SequenceEqual(players)) {
             // nothing changed
@@ -38,7 +37,7 @@ public sealed class PlayerListHud : HudElement {
         TryOpen();
     }
 
-    private GuiComposer Compose(List<PlayerData> players) {
+    private GuiComposer Compose(List<string> players) {
         (string? header, string? footer) = Util.ParseHeaderAndFooter(_mod, players.Count);
 
         ElementBounds dialog = new() {
@@ -84,6 +83,7 @@ public sealed class PlayerListHud : HudElement {
         return _keyHandler.IsKeyComboActive();
     }
 
+    // @formatter:off
     public override double InputOrder => 1.0999;
     public override double DrawOrder => 0.8899;
     public override float ZSize => 200F;
@@ -106,6 +106,7 @@ public sealed class PlayerListHud : HudElement {
     public override void Focus() { }
     public override bool Focused => false;
     protected override void OnFocusChanged(bool on) => focused = false;
+    // @formatter:on
 
     public override void Dispose() {
         base.Dispose();
