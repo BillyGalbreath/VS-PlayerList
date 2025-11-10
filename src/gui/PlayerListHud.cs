@@ -74,7 +74,7 @@ public sealed class PlayerListHud : HudElement {
             .AddStaticElement(new GuiPlayerGrid(_mod, players, gridBounds
                 .WithFixedOffset(0, headerBounds.fixedHeight)))
             .AddVtmlText(capi, footer, Util.CenteredFont, headerBounds.FlatCopy()
-                .WithFixedPosition(GuiPlayerGrid.Padding, headerBounds.fixedHeight + gridBounds.fixedHeight + GuiPlayerGrid.Padding * 2)
+                .WithFixedPosition(GuiPlayerGrid.Padding, headerBounds.fixedHeight + gridBounds.fixedHeight + GuiPlayerGrid.Padding)
                 .WithFixedSize(2048, 0))
             .EndChildElements();
     }
