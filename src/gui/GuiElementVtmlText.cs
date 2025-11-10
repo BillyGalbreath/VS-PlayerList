@@ -15,7 +15,7 @@ public class GuiElementVtmlText : GuiElementRichtext {
         bounds.fixedHeight = (TotalHeight / RuntimeEnv.GUIScale) + (bounds.fixedPaddingY * 2);
     }
 
-    public sealed override void BeforeCalcBounds() {
+    public override sealed void BeforeCalcBounds() {
         base.BeforeCalcBounds();
     }
 }

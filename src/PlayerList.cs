@@ -54,7 +54,7 @@ public class PlayerList : ModSystem {
     }
 
     private void OnPlayerJoin(IServerPlayer player) {
-        ServerMain server = ((ServerMain)player.Entity.World);
+        ServerMain server = (ServerMain)player.Entity.World;
         _config!.MaxPlayers = server.Config.GetMaxClients(server);
         _channel?.SendPacket(_config, player);
     }

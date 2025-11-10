@@ -20,6 +20,7 @@ public static class Extensions {
                 return Util.DefaultFont.Clone().WithColor(color);
             }
         }
+
         return Util.DefaultFont;
     }
 
@@ -31,6 +32,7 @@ public static class Extensions {
         if (!string.IsNullOrEmpty(text)) {
             composer.AddInteractiveElement(new GuiElementVtmlText(capi, text, font, bounds));
         }
+
         return composer;
     }
 }
