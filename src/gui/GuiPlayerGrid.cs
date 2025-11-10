@@ -54,7 +54,7 @@ public class GuiPlayerGrid : GuiElement {
         for (int row = 0; row < _rows; ++row) {
             for (int col = 0; col < _cols; ++col) {
                 if (i >= _players.Count) {
-                    goto done;
+                    continue;
                 }
 
                 double x = Bounds.drawX + col * (width + padding);
@@ -72,7 +72,5 @@ public class GuiPlayerGrid : GuiElement {
                 _textUtil.DrawTextLine(ctx, font, player.Name, x + scaled(30), y);
             }
         }
-
-        done: ;
     }
 }
