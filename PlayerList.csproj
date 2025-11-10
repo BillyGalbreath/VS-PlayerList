@@ -1,28 +1,55 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <TargetFramework>net8.0</TargetFramework>
+        <Version>2.1.5</Version>
+        <Description>View the player list on Vintage Story servers</Description>
         <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <WarningLevel>4</WarningLevel>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <DebugType>full</DebugType>
         <DebugSymbols>true</DebugSymbols>
         <ExcludeGeneratedDebugSymbol>false</ExcludeGeneratedDebugSymbol>
-        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-        <OutputPath>bin\mods\mod</OutputPath>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="$(VINTAGE_STORY)/**/*.dll" Exclude="$(VINTAGE_STORY)/**/CairoSharp.dll" Private="false" />
-        <None Include="LICENSE;README.md;resources/**" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" ExcludeAssets="runtime" PrivateAssets="all"/>
+        <Reference Include="$(VINTAGE_STORY)/**/*.dll" Exclude="$(VINTAGE_STORY)/**/CairoSharp.dll" Private="false"/>
+        <None Include="LICENSE;README.md;resources/**" Link="%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath=""/>
     </ItemGroup>
 
-    <Target Name="Package" AfterTargets="PostBuildEvent">
-        <MakeDir Directories="bin\mods\mod" />
-        <ZipDirectory DestinationFile="bin/$(TargetName).zip" SourceDirectory="$(TargetDir)" Overwrite="true" />
+    <Target Name="ExtraClean" AfterTargets="Clean">
+        <RemoveDir Directories="bin/$(Configuration)"/>
+    </Target>
+
+    <Target Name="ProcessResources" AfterTargets="PostBuildEvent">
+        <ItemGroup>
+            <ResourceFiles Include="resources/modinfo.json">
+                <Destination>$(TargetDir)/modinfo.json</Destination>
+            </ResourceFiles>
+        </ItemGroup>
+        <WriteLinesToFile Lines="$([System.IO.File]::ReadAllText(%(ResourceFiles.Identity))
+                .Replace('{version}','$(Version)')
+                .Replace('{description}','$(Description)')
+            )" File="%(ResourceFiles.Destination)" WriteOnlyWhenDifferent="false" Overwrite="true" Encoding="UTF-8"
+        />
+    </Target>
+
+    <Target Name="RemoveDepsFromTargetDir" AfterTargets="ProcessResources">
+        <ItemGroup>
+            <FilesToDelete Include="$(TargetDir)/*.deps.json"/>
+        </ItemGroup>
+        <Delete Files="@(FilesToDelete)"/>
+    </Target>
+
+    <Target Name="Package" AfterTargets="RemoveDepsFromTargetDir">
+        <ZipDirectory DestinationFile="bin/$(TargetName)-$(Version).zip" SourceDirectory="$(TargetDir)" Overwrite="true"/>
     </Target>
 
 </Project>
