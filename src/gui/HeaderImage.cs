@@ -30,7 +30,7 @@ public sealed class HeaderImage(ICoreClientAPI api, string url, ElementBounds bo
         Bounds.CalcWorldBounds();
 
         ctx.SetSourceRGBA(1.0, 1.0, 1.0, 1.0);
-        surface.Image(_bitmap, (int)Bounds.drawX, (int)Bounds.drawY, (int)Bounds.fixedWidth, (int)Bounds.fixedHeight);
+        surface.Image(_bitmap, (int)Bounds.drawX, (int)Bounds.drawY, (int)scaled(Bounds.fixedWidth), (int)scaled(Bounds.fixedHeight));
     }
 
     public HeaderImage SetBounds(ElementBounds bounds) {
