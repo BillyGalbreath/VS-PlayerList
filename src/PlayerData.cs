@@ -11,8 +11,11 @@ public class PlayerData {
 
     private readonly int _hash;
 
-    public PlayerData(IPlayer player) {
-        Name = player.PlayerName;
+    public PlayerData(PlayerList mod, IPlayer player) {
+        int max = mod.Config.MaxNameLength ?? 20;
+        string name = player.PlayerName;
+
+        Name = name.Length <= max ? name : $"{name[..max]}\u2026";
         Ping = (int)(player.Ping() * 1000);
         Font = player.EntitlementColoredFont();
 

@@ -18,7 +18,7 @@ public class GuiPlayerGrid : GuiElement {
 
     public GuiPlayerGrid(PlayerList mod, List<string> players, ElementBounds bounds) : base(mod.Api as ICoreClientAPI, bounds) {
         _mod = mod;
-        _players = players.Select(uid => new PlayerData(api.World.PlayerByUid(uid))).ToList();
+        _players = players.Select(uid => new PlayerData(_mod, api.World.PlayerByUid(uid))).ToList();
         _textUtil = new TextDrawUtil();
 
         // only show the first 100 players

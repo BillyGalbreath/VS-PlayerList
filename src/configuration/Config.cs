@@ -13,5 +13,7 @@ public class Config {
 
     public string? Footer { get; set; }
 
+    public int? MaxNameLength { get; set; } = 20;
+
     [JsonIgnore] public int? MaxPlayers { get; set; }
 }
