@@ -41,6 +41,7 @@ public class PlayerList : ModSystem {
             .SetMessageHandler<Config>(serverConfig => {
                 Mod.Logger.Event("Received config from the server");
                 _serverConfig = serverConfig;
+                _hud.UpdateList(true);
             });
     }
 

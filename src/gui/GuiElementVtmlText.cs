@@ -7,15 +7,18 @@ namespace playerlist.gui;
 public class GuiElementVtmlText : GuiElementRichtext {
     public GuiElementVtmlText(ICoreClientAPI capi, string text, CairoFont font, ElementBounds bounds)
         : base(capi, VtmlUtil.Richtextify(capi, text, font), bounds) {
-        bounds.ParentBounds = ElementBounds.Empty;
-        BeforeCalcBounds();
-        bounds.ParentBounds = null!;
+        // start with standard text size
+        ElementBounds maxBounds = ElementBounds.Fixed(0, 0);
+        font.AutoBoxSize(text, maxBounds);
+        bounds.fixedWidth = maxBounds.fixedWidth * 2; // double to compensate for bold, etc
 
-        bounds.fixedWidth = (MaxLineWidth / RuntimeEnv.GUIScale) + bounds.fixedPaddingX;
-        bounds.fixedHeight = (TotalHeight / RuntimeEnv.GUIScale) + (bounds.fixedPaddingY * 2);
-    }
+        // calculate real text size
+        Bounds.ParentBounds = ElementBounds.Empty;
+        CalcHeightAndPositions();
+        Bounds.ParentBounds = null!;
 
-    public override sealed void BeforeCalcBounds() {
-        base.BeforeCalcBounds();
+        // fix bounds to real size
+        Bounds.fixedWidth = MaxLineWidth / RuntimeEnv.GUIScale + 2.0;
+        //bounds.fixedHeight = TotalHeight / RuntimeEnv.GUIScale + 2.0;
     }
 }

@@ -28,6 +28,14 @@ public static class Extensions {
         return player is ClientPlayer clientPlayer ? clientPlayer.Ping : -1;
     }
 
+    public static GuiComposer TryAddStaticElement(this GuiComposer composer, GuiElement? element) {
+        if (element != null) {
+            composer.AddStaticElement(element);
+        }
+
+        return composer;
+    }
+
     public static GuiComposer AddVtmlText(this GuiComposer composer, ICoreClientAPI capi, string? text, CairoFont font, ElementBounds bounds) {
         if (!string.IsNullOrEmpty(text)) {
             composer.AddInteractiveElement(new GuiElementVtmlText(capi, text, font, bounds));

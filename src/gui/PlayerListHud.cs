@@ -11,79 +11,100 @@ public sealed class PlayerListHud : HudElement {
 
     private List<string> _players = [];
 
+    private HeaderImage? _logoImage;
+
     public PlayerListHud(PlayerList mod) : base((ICoreClientAPI)mod.Api) {
         _mod = mod;
         _keyHandler = new KeyHandler(capi);
         _gameTickListenerId = capi.Event.RegisterGameTickListener(_ => UpdateList(), 1000);
     }
 
-    private void UpdateList() {
+    public void UpdateList(bool force = false) {
         // quickly get players
         List<string> players = capi.World.AllOnlinePlayers
             .OrderBy(player => player.PlayerName)
             .Select(player => player.PlayerUID)
             .ToList();
 
-        if (_players.SequenceEqual(players)) {
-            // nothing changed
-            return;
+        // check if we need to update
+        if (!force && _players.SequenceEqual(players)) {
+            return; // nothing changed
         }
 
-        SingleComposer = Compose(_players = players).Compose();
+        // debug testing stuff
+        /*if (players.Count > 0) {
+            for (int i = 0; i < 100; i++) {
+                players.Add(players[0]);
+            }
+        }*/
 
+        // build logo image only once, not on every compose
+        if (force || _logoImage == null) {
+            if (_mod.Config.Logo == null) {
+                _logoImage = null;
+            } else {
+                try {
+                    _logoImage = new HeaderImage(capi, _mod.Config.Logo, ElementBounds.Empty);
+                } catch (Exception) {
+                    _logoImage = null;
+                }
+            }
+        }
+
+        // build it
+        Compose(_players = players);
+
+        // ensure gui is always open
         TryOpen();
     }
 
-    private GuiComposer Compose(List<string> players) {
+    private void Compose(List<string> players) {
+        if (players.Count == 0) {
+            return;
+        }
+
         (string? header, string? footer) = Util.ParseHeaderAndFooter(_mod, players.Count);
 
-        ElementBounds dialog = new() {
-            Alignment = EnumDialogArea.CenterTop,
-            BothSizing = ElementSizing.FitToChildren,
-            fixedOffsetY = 100
-        };
-        ElementBounds bgBounds = new() {
-            Alignment = EnumDialogArea.CenterTop,
-            BothSizing = ElementSizing.FitToChildren,
-            percentWidth = 1.0,
-            percentHeight = 1.0,
-            fixedPaddingX = GuiPlayerGrid.Padding,
-            fixedPaddingY = GuiPlayerGrid.Padding
-        };
-        ElementBounds gridBounds = new() {
+        ElementBounds logo = new() {
             Alignment = EnumDialogArea.CenterTop,
             BothSizing = ElementSizing.Fixed
         };
-        ElementBounds headerBounds = new() {
-            Alignment = EnumDialogArea.CenterTop,
-            BothSizing = ElementSizing.Fixed,
-            fixedX = GuiPlayerGrid.Padding,
-            fixedWidth = 2048,
-            fixedPaddingX = GuiPlayerGrid.Padding,
-            fixedPaddingY = GuiPlayerGrid.Padding
-        };
+        ElementBounds headText = logo.FlatCopy();
+        ElementBounds gridList = logo.FlatCopy();
+        ElementBounds footText = logo.FlatCopy();
 
-        return capi.Gui
-            .CreateCompo("playerlist", dialog)
-            .AddGameOverlay(bgBounds, GuiStyle.DialogDefaultBgColor)
-            .BeginChildElements(bgBounds)
-            .AddVtmlText(capi, header, Util.CenteredFont, headerBounds)
-            .AddStaticElement(new GuiPlayerGrid(_mod, players, gridBounds
-                .WithFixedOffset(0, headerBounds.fixedHeight)))
-            .AddVtmlText(capi, footer, Util.CenteredFont, headerBounds.FlatCopy()
-                .WithFixedPosition(GuiPlayerGrid.Padding, headerBounds.fixedHeight + gridBounds.fixedHeight + GuiPlayerGrid.Padding)
-                .WithFixedSize(2048, 0))
-            .EndChildElements();
+        ElementBounds bg = new ElementBounds {
+            Alignment = EnumDialogArea.CenterTop,
+            BothSizing = ElementSizing.FitToChildren
+        }.WithFixedPadding(GuiPlayerGrid.Padding);
+
+        SingleComposer = capi.Gui
+            .CreateCompo("playerlist", new ElementBounds {
+                Alignment = EnumDialogArea.CenterTop,
+                BothSizing = ElementSizing.FitToChildren,
+                fixedOffsetY = 100
+            })
+            .AddGameOverlay(bg, GuiStyle.DialogDefaultBgColor)
+            .BeginChildElements(bg)
+            .TryAddStaticElement(_logoImage?.SetBounds(logo))
+            .AddVtmlText(capi, header, Util.CenteredFont, headText.FixedUnder(logo, _logoImage != null ? GuiPlayerGrid.Padding : 0))
+            .AddStaticElement(new GuiPlayerGrid(_mod, players, gridList.FixedUnder(headText, !string.IsNullOrEmpty(header) ? GuiPlayerGrid.Padding : 0)))
+            .AddVtmlText(capi, footer, Util.CenteredFont, footText.FixedUnder(gridList, GuiPlayerGrid.Padding))
+            .EndChildElements()
+            .Compose();
     }
 
     public override bool ShouldReceiveRenderEvents() {
+        // only draw when key combo is active (tab pressed)
         return _keyHandler.IsKeyComboActive();
     }
 
     // @formatter:off
-    public override double InputOrder => 1.0999;
-    public override double DrawOrder => 0.8899;
-    public override float ZSize => 200F;
+    public override double InputOrder => 1.0999; // right behind chat dialog
+    public override double DrawOrder => 0.8899; // right behind escape menu
+    public override float ZSize => 200F; // push to top
+
+    // do not listen to any inputs
     public override bool ShouldReceiveKeyboardEvents() => false;
     public override void OnKeyDown(KeyEvent args) { }
     public override void OnKeyPress(KeyEvent args) { }
@@ -97,6 +118,8 @@ public sealed class PlayerListHud : HudElement {
     public override bool OnMouseEnterSlot(ItemSlot slot) => false;
     public override bool OnMouseLeaveSlot(ItemSlot itemSlot) => false;
     public override bool CaptureAllInputs() => false;
+
+    // do not close or take focus
     public override bool TryClose() => false;
     public override void Toggle() { }
     public override void UnFocus() { }
