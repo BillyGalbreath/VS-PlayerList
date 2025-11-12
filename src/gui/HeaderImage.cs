@@ -5,10 +5,18 @@ using Vintagestory.API.Common;
 
 namespace playerlist.gui;
 
-public sealed class HeaderImage(ICoreClientAPI api, string url, ElementBounds bounds) : GuiElement(api, bounds) {
-    private readonly BitmapRef? _bitmap = LoadBitmapAsync(url).Result;
+public sealed class HeaderImage : GuiElement {
+    private readonly PlayerList _mod;
+    private readonly BitmapRef? _bitmap;
+    private readonly BitmapRef _missing;
 
-    private static async Task<BitmapRef?> LoadBitmapAsync(string url) {
+    public HeaderImage(PlayerList mod, string url, ElementBounds bounds) : base(mod.Api as ICoreClientAPI, bounds) {
+        _mod = mod;
+        _bitmap = LoadBitmapAsync(url).Result;
+        _missing = api.Assets.Get(new AssetLocation("playerlist", "textures/missing.png")).ToBitmap(api);
+    }
+
+    private async Task<BitmapRef?> LoadBitmapAsync(string url) {
         using HttpClient client = new();
         try {
             byte[] bytes = await client.GetByteArrayAsync(url);
@@ -16,36 +24,44 @@ public sealed class HeaderImage(ICoreClientAPI api, string url, ElementBounds bo
             SKBitmap skBitmap = SKBitmap.Decode(SKData.CreateCopy(bytes));
             return new BitmapExternal(skBitmap);
         } catch (HttpRequestException ex) {
-            throw new Exception($"Error downloading image from URL: {ex.Message}");
+            _mod.Logger.Error($"Error downloading image from URL: {ex.Message}");
         } catch (Exception ex) {
-            throw new Exception($"Error decoding image: {ex.Message}");
+            _mod.Logger.Error($"Error decoding image: {ex.Message}");
         }
+
+        return null;
     }
 
     public override void ComposeElements(Context ctx, ImageSurface surface) {
-        if (_bitmap == null) {
-            return;
-        }
-
         Bounds.CalcWorldBounds();
 
         ctx.SetSourceRGBA(1.0, 1.0, 1.0, 1.0);
-        surface.Image(_bitmap, (int)Bounds.drawX, (int)Bounds.drawY, (int)scaled(Bounds.fixedWidth), (int)scaled(Bounds.fixedHeight));
+
+        try {
+            Draw(surface, _bitmap ?? _missing);
+        } catch (Exception) {
+            Draw(surface, _missing);
+        }
+    }
+
+    private void Draw(ImageSurface surface, BitmapRef bitmap) {
+        surface.Image(bitmap, (int)Bounds.drawX, (int)Bounds.drawY, (int)scaled(Bounds.fixedWidth), (int)scaled(Bounds.fixedHeight));
     }
 
     public HeaderImage SetBounds(ElementBounds bounds) {
         Bounds = bounds;
 
-        if (_bitmap == null) {
-            return this;
-        }
+        try {
+            if (Bounds.fixedWidth == 0) {
+                Bounds.fixedWidth = _bitmap?.Width ?? _missing.Width;
+            }
 
-        if (Bounds.fixedWidth == 0) {
-            Bounds.fixedWidth = _bitmap.Width;
-        }
-
-        if (Bounds.fixedHeight == 0) {
-            Bounds.fixedHeight = _bitmap.Height;
+            if (Bounds.fixedHeight == 0) {
+                Bounds.fixedHeight = _bitmap?.Height ?? _missing.Height;
+            }
+        } catch (Exception) {
+            Bounds.fixedWidth = _missing.Width;
+            Bounds.fixedHeight = _missing.Height;
         }
 
         return this;

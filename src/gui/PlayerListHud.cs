@@ -40,11 +40,11 @@ public sealed class PlayerListHud : HudElement {
 
         // build logo image only once, not on every compose
         if (force || _logoImage == null) {
-            if (_mod.Config.Logo == null) {
+            if (string.IsNullOrEmpty(_mod.Config.Logo)) {
                 _logoImage = null;
             } else {
                 try {
-                    _logoImage = new HeaderImage(capi, _mod.Config.Logo, ElementBounds.Empty);
+                    _logoImage = new HeaderImage(_mod, _mod.Config.Logo, ElementBounds.Empty);
                 } catch (Exception) {
                     _logoImage = null;
                 }
