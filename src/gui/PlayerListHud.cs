@@ -73,19 +73,18 @@ public sealed class PlayerListHud : HudElement {
         ElementBounds gridList = logo.FlatCopy();
         ElementBounds footText = logo.FlatCopy();
 
-        ElementBounds bg = new ElementBounds {
-            Alignment = EnumDialogArea.CenterTop,
-            BothSizing = ElementSizing.FitToChildren
-        }.WithFixedPadding(GuiPlayerGrid.Padding);
-
         SingleComposer = capi.Gui
             .CreateCompo("playerlist", new ElementBounds {
                 Alignment = EnumDialogArea.CenterTop,
                 BothSizing = ElementSizing.FitToChildren,
                 fixedOffsetY = 100
             })
-            .AddGameOverlay(bg, GuiStyle.DialogDefaultBgColor)
-            .BeginChildElements(bg)
+            .AddGameOverlay(new ElementBounds {
+                    Alignment = EnumDialogArea.CenterTop,
+                    BothSizing = ElementSizing.FitToChildren
+                }.WithFixedPadding(GuiPlayerGrid.Padding),
+                GuiStyle.DialogDefaultBgColor)
+            .BeginChildElements()
             .TryAddStaticElement(_logoImage?.SetBounds(logo))
             .AddVtmlText(capi, header, Util.CenteredFont, headText.FixedUnder(logo, _logoImage != null ? GuiPlayerGrid.Padding : 0))
             .AddStaticElement(new GuiPlayerGrid(_mod, players, gridList.FixedUnder(headText, !string.IsNullOrEmpty(header) ? GuiPlayerGrid.Padding : 0)))

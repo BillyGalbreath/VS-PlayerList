@@ -39,7 +39,7 @@ public class PlayerList : ModSystem {
         capi.Network.RegisterChannel(Mod.Info.ModID)
             .RegisterMessageType<Config>()
             .SetMessageHandler<Config>(serverConfig => {
-                Mod.Logger.Event("Received config from the server");
+                Logger.Event("Received config from the server");
                 _serverConfig = serverConfig;
                 _hud.UpdateList(true);
             });
