@@ -12,8 +12,16 @@ public sealed class HeaderImage : GuiElement {
 
     public HeaderImage(PlayerList mod, string url, ElementBounds bounds) : base(mod.Api as ICoreClientAPI, bounds) {
         _mod = mod;
-        _bitmap = LoadBitmapAsync(url).Result;
-        _missing = api.Assets.Get(new AssetLocation("playerlist", "textures/missing.png")).ToBitmap(api);
+        _bitmap = url.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? LoadBitmapAsync(url).Result : LoadBitmapAsset(url);
+        _missing = LoadBitmapAsset(new AssetLocation("playerlist", "textures/missing.png"))!;
+    }
+
+    private BitmapRef? LoadBitmapAsset(string path) {
+        return api.Assets.Get(new AssetLocation(path)).ToBitmap(api);
+    }
+
+    private BitmapRef? LoadBitmapAsset(AssetLocation asset) {
+        return api.Assets.Get(asset).ToBitmap(api);
     }
 
     private async Task<BitmapRef?> LoadBitmapAsync(string url) {
