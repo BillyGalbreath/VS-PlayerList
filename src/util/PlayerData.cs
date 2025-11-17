@@ -1,8 +1,9 @@
-using playerlist.util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
+using Vintagestory.Client.NoObf;
 
-namespace playerlist;
+namespace playerlist.util;
 
 public class PlayerData {
     public string Name { get; }
@@ -36,5 +37,21 @@ public class PlayerData {
 
     public static bool operator !=(PlayerData? a, PlayerData? b) {
         return !(a == b);
+    }
+}
+
+public static class PlayerExtensions {
+    public static CairoFont EntitlementColoredFont(this IPlayer player) {
+        if (player.Entitlements?.Count > 0) {
+            if (GlobalConstants.playerColorByEntitlement.TryGetValue(player.Entitlements[0].Code, out double[]? color)) {
+                return Util.DefaultFont.Clone().WithColor(color);
+            }
+        }
+
+        return Util.DefaultFont;
+    }
+
+    public static float Ping(this IPlayer player) {
+        return player is ClientPlayer clientPlayer ? clientPlayer.Ping : -1;
     }
 }

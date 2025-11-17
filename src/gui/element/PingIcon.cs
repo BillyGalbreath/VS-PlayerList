@@ -2,7 +2,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Util;
 
-namespace playerlist.gui;
+namespace playerlist.gui.element;
 
 public class PingIcon {
     private readonly BitmapRef[] _icon = new BitmapRef[5];

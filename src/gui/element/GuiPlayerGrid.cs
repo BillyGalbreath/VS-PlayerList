@@ -1,8 +1,9 @@
 using Cairo;
+using playerlist.util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
-namespace playerlist.gui;
+namespace playerlist.gui.element;
 
 public class GuiPlayerGrid : GuiElement {
     public const double Padding = 2;

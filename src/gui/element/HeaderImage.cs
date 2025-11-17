@@ -3,7 +3,7 @@ using SkiaSharp;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
-namespace playerlist.gui;
+namespace playerlist.gui.element;
 
 public sealed class HeaderImage : GuiElement {
     private readonly PlayerList _mod;

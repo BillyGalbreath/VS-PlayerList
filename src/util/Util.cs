@@ -1,3 +1,4 @@
+using System.Reflection;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -32,5 +33,13 @@ public abstract class Util {
             .Replace("{Month}", month)
             .Replace("{Day}", day)
             .Replace("{Year}", year);
+    }
+}
+
+public static class UtilExtensions {
+    private const BindingFlags _flags = BindingFlags.NonPublic | BindingFlags.Instance;
+
+    public static T? GetField<T>(this object obj, string name) where T : class {
+        return obj.GetType().GetField(name, _flags)?.GetValue(obj) as T;
     }
 }

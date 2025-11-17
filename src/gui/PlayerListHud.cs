@@ -1,3 +1,4 @@
+using playerlist.gui.element;
 using playerlist.util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -133,5 +134,15 @@ public sealed class PlayerListHud : HudElement {
         _keyHandler.Dispose();
 
         capi.Event.UnregisterGameTickListener(_gameTickListenerId);
+    }
+}
+
+public static class ComposerExtensions {
+    public static GuiComposer TryAddStaticElement(this GuiComposer composer, GuiElement? element) {
+        if (element != null) {
+            composer.AddStaticElement(element);
+        }
+
+        return composer;
     }
 }

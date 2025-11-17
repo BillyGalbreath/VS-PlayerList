@@ -2,7 +2,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 
-namespace playerlist.gui;
+namespace playerlist.gui.element;
 
 public class GuiElementVtmlText : GuiElementRichtext {
     public GuiElementVtmlText(ICoreClientAPI capi, string text, CairoFont font, ElementBounds bounds)
@@ -20,5 +20,15 @@ public class GuiElementVtmlText : GuiElementRichtext {
         // fix bounds to real size
         Bounds.fixedWidth = MaxLineWidth / RuntimeEnv.GUIScale + 2.0;
         //bounds.fixedHeight = TotalHeight / RuntimeEnv.GUIScale + 2.0;
+    }
+}
+
+public static class VtmlExtensions {
+    public static GuiComposer AddVtmlText(this GuiComposer composer, ICoreClientAPI capi, string? text, CairoFont font, ElementBounds bounds) {
+        if (!string.IsNullOrEmpty(text)) {
+            composer.AddInteractiveElement(new GuiElementVtmlText(capi, text, font, bounds));
+        }
+
+        return composer;
     }
 }
