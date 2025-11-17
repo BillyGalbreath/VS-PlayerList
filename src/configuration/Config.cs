@@ -7,7 +7,7 @@ namespace playerlist.configuration;
 public class Config {
     public int[]? Thresholds { get; set; } = [100, 250, 500];
 
-    public string? Logo { get; set; } = "https://i.imgur.com/gTAs0Il.png";
+    public string? Logo { get; set; } = "playerlist:textures/vs_logo.png";
 
     public string? Header { get; set; }
 

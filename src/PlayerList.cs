@@ -65,6 +65,10 @@ public class PlayerList : ModSystem {
 
         _config = Api.LoadModConfig<Config>($"{ModId}.json") ?? new Config();
 
+        if (_config.Logo == "https://i.imgur.com/gTAs0Il.png") {
+            _config.Logo = "playerlist:textures/vs_logo.png";
+        }
+
         string json = JsonConvert.SerializeObject(_config, new JsonSerializerSettings {
             Formatting = Formatting.Indented,
             NullValueHandling = Api is ICoreServerAPI ? NullValueHandling.Include : NullValueHandling.Ignore,
